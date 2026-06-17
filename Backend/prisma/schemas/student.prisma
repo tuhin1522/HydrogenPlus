@@ -1,0 +1,23 @@
+// Student profile model
+model StudentProfile {
+  id              String   @id @default(uuid())
+
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+
+  batchId         String
+  batch           Batch    @relation(fields: [batchId], references: [id])
+
+  guardianName    String
+  guardianPhone   String
+  schoolName      String?
+  address         String?
+
+  admissionDate   DateTime
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([batchId])
+  @@map("student_profiles")
+}

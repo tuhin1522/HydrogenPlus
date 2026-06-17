@@ -1,0 +1,34 @@
+// Subject and batch subject management models
+model Subject {
+  id        String   @id @default(uuid())
+
+  name      String   @unique
+
+  batchSubjects BatchSubject[]
+  routines      Routine[]
+  courses       Course[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subjects")
+}
+
+model BatchSubject {
+  id         String @id @default(uuid())
+
+  batchId    String
+  batch      Batch @relation(fields: [batchId], references: [id])
+
+  subjectId  String
+  subject    Subject @relation(fields: [subjectId], references: [id])
+
+  teacherId  String
+  teacher    TeacherProfile @relation(fields: [teacherId], references: [id])
+
+  @@unique([batchId, subjectId])
+
+  @@index([teacherId])
+
+  @@map("batch_subjects")
+}

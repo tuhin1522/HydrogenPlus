@@ -1,0 +1,32 @@
+// Class routine/schedule management model
+model Routine {
+  id          String @id @default(uuid())
+
+  branchId    String
+  branch      Branch @relation(fields: [branchId], references: [id])
+
+  batchId     String
+  batch       Batch @relation(fields: [batchId], references: [id])
+
+  subjectId   String
+  subject     Subject @relation(fields: [subjectId], references: [id])
+
+  teacherId   String
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+
+  room        String
+
+  dayOfWeek   DayOfWeek
+
+  startTime   DateTime
+  endTime     DateTime
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([batchId])
+  @@index([teacherId])
+  @@index([room])
+
+  @@map("routines")
+}

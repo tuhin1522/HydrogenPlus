@@ -1,0 +1,37 @@
+// User roles
+enum UserRole {
+  SUPER_ADMIN
+  BRANCH_ADMIN
+  TEACHER
+  STUDENT
+}
+
+// Branch status
+enum BranchStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// Batch status
+enum BatchStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// Course status
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// Days of week for routines
+enum DayOfWeek {
+  SATURDAY
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}

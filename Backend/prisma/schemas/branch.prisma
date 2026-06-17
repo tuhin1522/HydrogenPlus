@@ -1,0 +1,18 @@
+// Branch management model
+model Branch {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  phone     String
+  email     String?
+  status    BranchStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  batches   Batch[]
+  routines  Routine[]
+
+  @@map("branches")
+}
