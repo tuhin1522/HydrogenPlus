@@ -1,5 +1,7 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
+import { indexRoutes } from "./app/routes";
+import cookieParser from "cookie-parser";
 
 const app: Application = express();
 
@@ -7,6 +9,10 @@ const app: Application = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Routes
+app.use('/api/v1', indexRoutes);
 
 // Health Check
 app.get("/", (_req: Request, res: Response) => {
@@ -16,7 +22,5 @@ app.get("/", (_req: Request, res: Response) => {
   });
 });
 
-// Routes
-// app.use("/api/v1/users", userRoutes);
 
 export default app;
