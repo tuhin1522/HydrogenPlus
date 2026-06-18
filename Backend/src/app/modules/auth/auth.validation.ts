@@ -90,8 +90,37 @@ const validateLogin = [
     .withMessage('Password is required'),
 ];
 
+// Validation for forgot password
+const validateForgotPassword = [
+  body('email')
+    .trim()
+    .isEmail()
+    .withMessage(AUTH_ERRORS.EMAIL_INVALID)
+    .normalizeEmail(),
+];
+
+// Validation for reset password
+const validateResetPassword = [
+  body('token')
+    .notEmpty()
+    .withMessage('Reset token is required'),
+
+  body('newPassword')
+    .isLength({ min: PASSWORD_REQUIREMENTS.MIN_LENGTH })
+    .withMessage(AUTH_ERRORS.PASSWORD_TOO_SHORT)
+    .matches(PASSWORD_REGEX.UPPERCASE)
+    .withMessage(AUTH_ERRORS.PASSWORD_NO_UPPERCASE)
+    .matches(PASSWORD_REGEX.NUMBER)
+    .withMessage(AUTH_ERRORS.PASSWORD_NO_NUMBER)
+    .matches(PASSWORD_REGEX.SPECIAL_CHAR)
+    .withMessage(AUTH_ERRORS.PASSWORD_NO_SPECIAL_CHAR),
+];
+
+
 export const authValidation = { 
   validateSignup, 
   handleValidationErrors, 
-  validateLogin 
+  validateLogin,
+  validateForgotPassword,
+  validateResetPassword 
 };

@@ -30,4 +30,17 @@ router.get('/verify', authController.verifyEmailHandler);
  */
 router.post('/resend-verification', authController.resendVerificationHandler);
 
+/**
+ * POST /auth/forgot-password
+ * Send password reset email
+ */
+router.post('/forgot-password', authValidation.validateForgotPassword, authValidation.handleValidationErrors, authController.forgotPasswordHandler);
+
+/**
+ * POST /auth/reset-password
+ * Reset password using token
+ */
+router.post('/reset-password', authValidation.validateResetPassword, authValidation.handleValidationErrors, authController.resetPasswordHandler);
+
+
 export const authRoutes = router;
