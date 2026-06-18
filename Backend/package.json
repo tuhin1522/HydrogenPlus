@@ -8,9 +8,8 @@
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint ./src/**/*",
-    "merge-schemas": "node scripts/merge-schemas.js",
-    "migrate": "npm run merge-schemas && prisma migrate dev",
-    "generate": "npm run merge-schemas && prisma generate",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -28,10 +27,13 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@types/cookie-parser": "^1.4.10",
     "better-auth": "^1.6.19",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "http-status": "^2.1.0",
     "pg": "^8.21.0",
     "uuid": "^14.0.0"
   }
