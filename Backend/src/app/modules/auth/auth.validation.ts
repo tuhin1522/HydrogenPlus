@@ -5,7 +5,7 @@ import {
   PASSWORD_REQUIREMENTS,
   PASSWORD_REGEX,
   AUTH_ERRORS,
-} from './constants/auth.constants';
+} from './auth.constants';
 
 // Validation middleware for user signup
 const validateSignup = [

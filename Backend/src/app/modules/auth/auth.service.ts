@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { prisma } from '../../lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
-import { TOKEN_EXPIRY, AUTH_ERRORS } from './constants/auth.constants';
+import { TOKEN_EXPIRY, AUTH_ERRORS } from './auth.constants';
 
 // Configure nodemailer transporter for Gmail
 const transporter = nodemailer.createTransport({
