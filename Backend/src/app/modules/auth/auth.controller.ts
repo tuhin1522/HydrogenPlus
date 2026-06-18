@@ -92,9 +92,52 @@ const resendVerificationHandler = catchAsync(
   }
 );
 
+/**
+ * Handle forgot password request
+ * POST /auth/forgot-password
+ */
+const forgotPasswordHandler = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  const result = await authService.forgotPassword(email);
+
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: result.message,
+  });
+});
+
+/**
+ * Handle password reset
+ * POST /auth/reset-password
+ */
+const resetPasswordHandler = catchAsync(async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  if (!token) {
+    return sendResponse(res, {
+      httpStatusCode: 400,
+      success: false,
+      message: 'Reset token is required',
+    });
+  }
+
+  await authService.resetPassword(token, newPassword);
+
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: 'Password reset successfully. You can now login with your new password.',
+  });
+});
+
+
 export const authController = {
   signupHandler,
   loginHandler,
   verifyEmailHandler,
   resendVerificationHandler,
+  forgotPasswordHandler,
+  resetPasswordHandler,
 };
