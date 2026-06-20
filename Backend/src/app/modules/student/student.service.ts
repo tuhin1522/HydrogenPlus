@@ -1,161 +1,84 @@
-import { prisma } from '../../lib/prisma';
+import { prisma } from "@/app/lib/prisma";
+import { ICreateStudentProfile } from "./student.interface";
+import { QueryBuilder } from "@/app/utils/queryBuilder";
+import { IQueryParams } from "@/app/interface/query.interface";
 
-/**
- * Get the logged-in student's own profile by userId from JWT
- */
-const getMyProfile = async (userId: string) => {
-  const profile = await prisma.studentProfile.findUnique({
-    where: { userId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-          image: true,
-          emailVerified: true,
-          isActive: true,
-          createdAt: true,
-        },
-      },
-      batch: {
-        select: {
-          id: true,
-          name: true,
-          status: true,
-          classLevel: {
-            select: { id: true, name: true },
-          },
-          branch: {
-            select: { id: true, name: true },
-          },
-        },
-      },
-    },
+const createStudentProfile = async (data: ICreateStudentProfile) => {
+  const existingStudent = await prisma.studentProfile.findUnique({
+    where: { userId: data.userId }
   });
 
-  if (!profile) {
-    throw new Error('Student profile not found');
+  if (existingStudent) {
+    throw new Error('Student profile already exists for this user');
   }
 
-  return profile;
-};
-
-/**
- * Update the logged-in student's own profile (only allowed fields)
- */
-const updateMyProfile = async (
-  userId: string,
-  data: {
-    guardianName?: string;
-    guardianPhone?: string;
-    schoolName?: string;
-    address?: string;
-  }
-) => {
-  const existing = await prisma.studentProfile.findUnique({ where: { userId } });
-
-  if (!existing) {
-    throw new Error('Student profile not found');
-  }
-
-  const updated = await prisma.studentProfile.update({
-    where: { userId },
+  return prisma.studentProfile.create({
     data,
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-          image: true,
-        },
-      },
-      batch: {
-        select: {
-          id: true,
-          name: true,
-          classLevel: { select: { id: true, name: true } },
-          branch: { select: { id: true, name: true } },
-        },
-      },
-    },
   });
-
-  return updated;
 };
 
-/**
- * Get all students (for Branch Admin / Super Admin)
- */
-const getAllStudents = async () => {
-  const students = await prisma.studentProfile.findMany({
-    include: {
+const getMyProfile = async (userId: string) => {
+  return await prisma.studentProfile.findUnique({
+    where: { userId },
+  });
+};
+
+const getAllStudents = async (query: IQueryParams) => {
+  const studentQuery = new QueryBuilder(
+    prisma.studentProfile as any,
+    query,
+    {
+      searchableFields: ['guardianName', 'guardianPhone', 'schoolName', 'address', 'user.name', 'user.email'],
+      filterableFields: ['batchId', 'userId'],
+    }
+  )
+    .search()
+    .filter()
+    .sort()
+    .paginate()
+    .fields()
+    .dynamicInclude({
       user: {
         select: {
           id: true,
           name: true,
           email: true,
           phone: true,
+          role: true,
           isActive: true,
-        },
+        }
       },
-      batch: {
-        select: {
-          id: true,
-          name: true,
-          classLevel: { select: { name: true } },
-          branch: { select: { name: true } },
-        },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+      batch: true,
+    }, ['user', 'batch']);
 
-  return students;
+  const result = await studentQuery.execute();
+  return result;
 };
 
-/**
- * Get a single student by their StudentProfile ID (for admin)
- */
 const getStudentById = async (id: string) => {
-  const student = await prisma.studentProfile.findUnique({
+  return await prisma.studentProfile.findUnique({
     where: { id },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-          image: true,
-          isActive: true,
-          createdAt: true,
-        },
-      },
-      batch: {
-        select: {
-          id: true,
-          name: true,
-          classLevel: { select: { id: true, name: true } },
-          branch: { select: { id: true, name: true } },
-        },
-      },
-    },
   });
+};
 
-  if (!student) {
-    throw new Error('Student not found');
-  }
+const updateMyProfile = async (id: string, data: Partial<ICreateStudentProfile>) => {
+  return await prisma.studentProfile.update({
+    where: { id },
+    data,
+  });
+};
 
-  return student;
+const deleteStudentProfile = async (id: string) => {
+  return await prisma.studentProfile.delete({
+    where: { id },
+  });
 };
 
 export const studentService = {
+  createStudentProfile,
   getMyProfile,
-  updateMyProfile,
   getAllStudents,
   getStudentById,
+  updateMyProfile,
+  deleteStudentProfile,
 };

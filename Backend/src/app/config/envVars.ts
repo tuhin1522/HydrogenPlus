@@ -18,6 +18,11 @@ interface EnvConfig {
   EMAIL_USER: string;
   EMAIL_PASS: string;
   EMAIL_FROM: string;
+
+  ACCESS_TOKEN_SECRET: string;
+  REFRESH_TOKEN_SECRET: string;
+  ACCESS_TOKEN_EXPIRES: string;
+  REFRESH_TOKEN_EXPIRES: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -35,6 +40,11 @@ const loadEnvVariables = (): EnvConfig => {
     "EMAIL_USER",
     "EMAIL_PASS",
     "EMAIL_FROM",
+
+    "ACCESS_TOKEN_SECRET",
+    "REFRESH_TOKEN_SECRET",
+    "ACCESS_TOKEN_EXPIRES",
+    "REFRESH_TOKEN_EXPIRES",
   ];
 
   requiredVariable.forEach((variable) => {
@@ -60,6 +70,11 @@ const loadEnvVariables = (): EnvConfig => {
     EMAIL_USER: process.env.EMAIL_USER as string,
     EMAIL_PASS: process.env.EMAIL_PASS as string,
     EMAIL_FROM: process.env.EMAIL_FROM as string,
+
+    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET as string,
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string,
+    ACCESS_TOKEN_EXPIRES: process.env.ACCESS_TOKEN_EXPIRES as string,
+    REFRESH_TOKEN_EXPIRES: process.env.REFRESH_TOKEN_EXPIRES as string,
   };
 };
 

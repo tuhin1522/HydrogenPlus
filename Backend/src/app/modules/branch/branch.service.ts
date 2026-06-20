@@ -1,5 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { ICreateBranch } from "./branch.interface";
+import { QueryBuilder } from "@/app/utils/queryBuilder";
+import { IQueryParams } from "@/app/interface/query.interface";
 
 const createBranch = async (payload: ICreateBranch) => {
     const { name, address, phone, email, status, managerName } = payload;
@@ -8,9 +10,18 @@ const createBranch = async (payload: ICreateBranch) => {
     });
 };
 
-const getAllBranches = async () => {
-    const branches = await prisma.branch.findMany();
-    return branches;
+const getAllBranches = async (query: IQueryParams) => {
+    const branchQuery = new QueryBuilder(
+        prisma.branch as any,
+        query,
+        {
+            searchableFields: ['name', 'address', 'managerName'],
+            filterableFields: ['status']
+        }
+    ).search().filter().sort().paginate().fields();
+    
+    const result = await branchQuery.execute();
+    return result;
 };
 
 const getBranchById = async (id: string) => {

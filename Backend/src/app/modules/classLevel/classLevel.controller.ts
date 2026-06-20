@@ -17,13 +17,14 @@ const createClassLevel = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllClassLevels = catchAsync(async (req: Request, res: Response) => {
-  const classLevels = await classLevelService.getAllClassLevels();
+  const classLevels = await classLevelService.getAllClassLevels(req.query);
 
   sendResponse(res, {
     success: true,
     httpStatusCode: status.OK,
     message: 'Class Levels Retrieved Successfully!',
-    data: classLevels,
+    data: classLevels.data,
+    meta: classLevels.meta,
   })
 });
 

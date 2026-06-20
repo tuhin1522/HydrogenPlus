@@ -1,91 +1,93 @@
-import { Request, Response } from 'express';
-import { catchAsync } from '../../shared/catchAsync';
-import { sendResponse } from '../../shared/sendResponse';
+import { Request, Response } from "express";
+import { sendResponse } from "@/app/shared/sendResponse";
+import { catchAsync } from "@/app/shared/catchAsync";
+import { ICreateStudentProfile } from "./student.interface";
 import { studentService } from './student.service';
 
-/**
- * GET /students/profile
- * Get the logged-in student's own profile
- */
-const getMyProfileHandler = catchAsync(
-  async (req: Request, res: Response) => {
-    const userId = req.user.userId;
+const createStudentProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.userId;
 
-    const profile = await studentService.getMyProfile(userId);
+  const studentData = {
+    ...req.body,
+    userId,
+  };
 
-    sendResponse(res, {
-      httpStatusCode: 200,
-      success: true,
-      message: 'Student profile retrieved successfully',
-      data: profile,
-    });
+  const student = await studentService.createStudentProfile(studentData);
+
+  sendResponse(res, {
+    httpStatusCode: 201,
+    success: true,
+    message: "Student profile created successfully.",
+    data: student,
+  });
+});
+
+const getMyProfileHandler = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.userId;
+
+  const student = await studentService.getMyProfile(userId);
+
+  if (!student) {
+    throw new Error("Student profile not found");
   }
-);
 
-/**
- * PATCH /students/profile
- * Update the logged-in student's own profile
- */
-const updateMyProfileHandler = catchAsync(
-  async (req: Request, res: Response) => {
-    const userId = req.user.userId;
-    const { guardianName, guardianPhone, schoolName, address } = req.body;
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Student profile retrieved successfully.",
+    data: student,
+  });
+});
 
-    const updated = await studentService.updateMyProfile(userId, {
-      guardianName,
-      guardianPhone,
-      schoolName,
-      address,
-    });
+const getAllStudentsHandler = catchAsync(async (req: Request, res: Response) => {
+  const students = await studentService.getAllStudents(req.query);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Students retrieved successfully.",
+    data: students.data,
+    meta: students.meta,
+  });
+});
 
-    sendResponse(res, {
-      httpStatusCode: 200,
-      success: true,
-      message: 'Student profile updated successfully',
-      data: updated,
-    });
-  }
-);
+const getStudentByIdHandler = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const student = await studentService.getStudentById(id as string);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Student profile retrieved successfully.",
+    data: student
+  });
+});
 
-/**
- * GET /students
- * Get all students (Branch Admin / Super Admin)
- */
-const getAllStudentsHandler = catchAsync(
-  async (_req: Request, res: Response) => {
-    const students = await studentService.getAllStudents();
+const updateMyProfileHandler = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const studentData: Partial<ICreateStudentProfile> = req.body;
+  const updatedStudent = await studentService.updateMyProfile(id as string, studentData);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Student profile updated successfully.",
+    data: updatedStudent
+  });
+});
 
-    sendResponse(res, {
-      httpStatusCode: 200,
-      success: true,
-      message: 'Students retrieved successfully',
-      data: students,
-    });
-  }
-);
-
-/**
- * GET /students/:id
- * Get student by StudentProfile ID (Branch Admin / Super Admin)
- */
-const getStudentByIdHandler = catchAsync(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    const student = await studentService.getStudentById(id as string);
-
-    sendResponse(res, {
-      httpStatusCode: 200,
-      success: true,
-      message: 'Student retrieved successfully',
-      data: student,
-    });
-  }
-);
+const deleteStudentProfileHandler = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  await studentService.deleteStudentProfile(id as string);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Student profile deleted successfully.",
+  });
+});
 
 export const studentController = {
+  createStudentProfile,
   getMyProfileHandler,
-  updateMyProfileHandler,
   getAllStudentsHandler,
   getStudentByIdHandler,
+  updateMyProfileHandler,
+  deleteStudentProfileHandler,
 };

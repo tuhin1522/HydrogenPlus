@@ -1,5 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { ICreateTeacher } from "./teacher.interface";
+import { QueryBuilder } from "@/app/utils/queryBuilder";
+import { IQueryParams } from "@/app/interface/query.interface";
 
 const createTeacherProfile = async (teacherData: ICreateTeacher) => {
     const teacher = await prisma.teacherProfile.create({
@@ -8,9 +10,36 @@ const createTeacherProfile = async (teacherData: ICreateTeacher) => {
     return teacher;
 };
 
-const getAllTeachers = async () => {
-    const teachers = await prisma.teacherProfile.findMany();
-    return teachers;
+const getAllTeachers = async (query: IQueryParams) => {
+    const teacherQuery = new QueryBuilder(
+        prisma.teacherProfile as any,
+        query,
+        {
+            searchableFields: ['qualification', 'specialization', 'bio', 'user.name', 'user.email'],
+            filterableFields: ['branchId', 'userId'],
+        }
+    )
+    .search()
+    .filter()
+    .sort()
+    .paginate()
+    .fields()
+    .dynamicInclude({
+        user: {
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+                isActive: true,
+            }
+        },
+        branch: true,
+    }, ['user', 'branch']);
+
+    const result = await teacherQuery.execute();
+    return result;
 };
 
 const getTeacherById = async (id: string) => {

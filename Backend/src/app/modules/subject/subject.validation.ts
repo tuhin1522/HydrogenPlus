@@ -1,28 +1,17 @@
 import { z } from "zod";
 
-const createSubjectSchema = z.object({
-  name: z.string({
-    message: "Name is required",
-  }).min(2, "Name must be at least 2 characters long"),
-  code: z.string().optional(),
-  classLevelId: z.string({
-    message: "classLevelId is required",
-  }).uuid("Invalid classLevelId format"),
+const createSubjectZodSchema = z.object({
+  name: z.string({ message: "Subject name is required" }).min(1, "Subject name cannot be empty"),
+  classLevelId: z.string({ message: "Class level ID is required" }).uuid("Invalid Class Level ID format"),
+  code: z.string().optional().nullable(),
 });
 
-const updateSubjectSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters long").optional(),
-  code: z.string().optional(),
-  classLevelId: z.string().uuid("Invalid classLevelId format").optional(),
+const updateSubjectZodSchema = z.object({
+  name: z.string().min(1, "Subject name cannot be empty").optional(),
+  code: z.string().optional().nullable(),
 });
 
-export const subjectValidation = {
-  createSubjectSchema,
-  updateSubjectSchema,
-};
-
-// Direct exports for route usage and compatibility
-export {
-  createSubjectSchema,
-  updateSubjectSchema,
+export const SubjectValidation = {
+  createSubjectZodSchema,
+  updateSubjectZodSchema,
 };
