@@ -3,10 +3,6 @@ import { catchAsync } from '../../shared/catchAsync';
 import { sendResponse } from '../../shared/sendResponse';
 import { authService } from './auth.service';
 
-/**
- * Handle user signup
- * POST /auth/signup
- */
 const signupHandler = catchAsync(async (req: Request, res: Response) => {
   const { name, email, phone, password } = req.body;
 
@@ -22,10 +18,6 @@ const signupHandler = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/**
- * Handle user login
- * POST /auth/login
- */
 const loginHandler = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -42,10 +34,6 @@ const loginHandler = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/**
- * Handle email verification
- * GET /auth/verify?token=abc123xyz
- */
 const verifyEmailHandler = catchAsync(async (req: Request, res: Response) => {
   const { token } = req.query;
 
@@ -66,10 +54,6 @@ const verifyEmailHandler = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/**
- * Handle resend verification email
- * POST /auth/resend-verification
- */
 const resendVerificationHandler = catchAsync(
   async (req: Request, res: Response) => {
     const { email } = req.body;
@@ -92,10 +76,6 @@ const resendVerificationHandler = catchAsync(
   }
 );
 
-/**
- * Handle forgot password request
- * POST /auth/forgot-password
- */
 const forgotPasswordHandler = catchAsync(async (req: Request, res: Response) => {
   const { email } = req.body;
 
@@ -108,10 +88,6 @@ const forgotPasswordHandler = catchAsync(async (req: Request, res: Response) => 
   });
 });
 
-/**
- * Handle password reset
- * POST /auth/reset-password
- */
 const resetPasswordHandler = catchAsync(async (req: Request, res: Response) => {
   const { token, newPassword } = req.body;
 
@@ -133,12 +109,13 @@ const resetPasswordHandler = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getUser = catchAsync(async(req:Request,res:Response)=>{
-  const result = await authService.getUser()
+  const result = await authService.getUser(req.query);
   sendResponse(res, {
     httpStatusCode: 200,
     success: true,
     message: 'User fetched successfully.',
-    data: result,
+    data: result.data,
+    meta: result.meta,
   });
 }) 
 

@@ -17,13 +17,14 @@ const createBranch = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllBranches = catchAsync(async (req: Request, res: Response) => {
-    const branches = await branchService.getAllBranches();
+    const branches = await branchService.getAllBranches(req.query);
 
     sendResponse(res, {
         success: true,
         httpStatusCode: status.OK,
         message: 'Branches Retrieved Successfully!',
-        data: branches,
+        data: branches.data,
+        meta: branches.meta,
     })
 });
 

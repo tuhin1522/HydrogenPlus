@@ -1,5 +1,7 @@
 import { prisma } from '../../lib/prisma';
 import { Batch, BatchStatus } from "@/generated/prisma";
+import { QueryBuilder } from "@/app/utils/queryBuilder";
+import { IQueryParams } from "@/app/interface/query.interface";
 
 /**
  * Create a new batch
@@ -39,49 +41,23 @@ const createBatch = async (data: {
 /**
  * Get all batches with optional filtering
  */
-const getAllBatches = async (filters?: {
-  branchId?: string;
-  classLevelId?: string;
-  status?: BatchStatus;
-  skip?: number;
-  take?: number;
-}): Promise<{ batches: Batch[]; total: number }> => {
-  const skip = filters?.skip || 0;
-  const take = filters?.take || 10;
+const getAllBatches = async (query: IQueryParams) => {
+  const batchQuery = new QueryBuilder(
+      prisma.batch as any,
+      query,
+      {
+          searchableFields: ['name'],
+          filterableFields: ['branchId', 'classLevelId', 'status']
+      }
+  ).search().filter().sort().paginate().fields().dynamicInclude({
+      branch: true,
+      classLevel: true,
+      students: true,
+      subjects: true,
+  }, ['branch', 'classLevel']);
 
-  const where: any = {};
-
-  if (filters?.branchId) {
-    where.branchId = filters.branchId;
-  }
-
-  if (filters?.classLevelId) {
-    where.classLevelId = filters.classLevelId;
-  }
-
-  if (filters?.status) {
-    where.status = filters.status;
-  }
-
-  const [batches, total] = await Promise.all([
-    prisma.batch.findMany({
-      where,
-      include: {
-        branch: true,
-        classLevel: true,
-        students: true,
-        subjects: true,
-      },
-      skip,
-      take,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    }),
-    prisma.batch.count({ where }),
-  ]);
-
-  return { batches, total };
+  const result = await batchQuery.execute();
+  return result;
 };
 
 /**

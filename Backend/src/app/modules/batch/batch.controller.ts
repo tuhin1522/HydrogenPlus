@@ -32,26 +32,14 @@ const createBatchHandler = catchAsync(async (req: Request, res: Response) => {
  * Query params: branchId, classLevelId, status, skip, take
  */
 const getAllBatchesHandler = catchAsync(async (req: Request, res: Response) => {
-  const { branchId, classLevelId, status, skip, take } = req.query;
-
-  const result = await batchService.getAllBatches({
-    branchId: branchId as string,
-    classLevelId: classLevelId as string,
-    status: status as 'ACTIVE' | 'INACTIVE' | undefined,
-    skip: skip ? parseInt(skip as string) : undefined,
-    take: take ? parseInt(take as string) : undefined,
-  });
+  const result = await batchService.getAllBatches(req.query);
 
   sendResponse(res, {
     httpStatusCode: 200,
     success: true,
     message: 'Batches retrieved successfully',
-    data: {
-      batches: result.batches,
-      total: result.total,
-      skip: skip ? parseInt(skip as string) : 0,
-      take: take ? parseInt(take as string) : 10,
-    },
+    data: result.data,
+    meta: result.meta,
   });
 });
 

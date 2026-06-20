@@ -1,55 +1,27 @@
-import { Router } from 'express';
-import { studentController } from './student.controller';
-import { studentValidation } from './student.validation';
-import { authMiddleware } from '../../middleware/auth.middleware';
+import { Router } from "express";
+import { studentController } from "./student.controller";
+import { checkAuth } from "../../middleware/checkAuth";
+import { UserRole } from "@/generated/prisma";
+import { validateRequest } from "../../middleware/validateRequest";
+import { StudentValidation } from "./student.validation";
 
 const router = Router();
 
-/**
- * GET /students/profile
- * Returns the logged-in student's own profile.
- * Requires: valid JWT token
- */
-router.get(
-  '/profile',
-  authMiddleware.authenticate,
-  studentController.getMyProfileHandler
+router.post(
+  "/create-student-profile",
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
+  validateRequest(StudentValidation.createStudentProfileZodSchema),
+  studentController.createStudentProfile
 );
-
-/**
- * PATCH /students/profile
- * Updates the logged-in student's own profile (guardianName, guardianPhone, schoolName, address).
- * Requires: valid JWT token
- */
+router.get("/my-profile", checkAuth(UserRole.STUDENT), studentController.getMyProfileHandler);
+router.get("/all-students", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER), studentController.getAllStudentsHandler);
+router.get("/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER), studentController.getStudentByIdHandler);
 router.patch(
-  '/profile',
-  authMiddleware.authenticate,
-  studentValidation.validateUpdateProfile,
-  studentValidation.handleValidationErrors,
+  "/update/:id",
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.STUDENT),
+  validateRequest(StudentValidation.updateStudentProfileZodSchema),
   studentController.updateMyProfileHandler
 );
-
-/**
- * GET /students
- * Returns all students. Intended for Branch Admin / Super Admin.
- * Requires: valid JWT token
- */
-router.get(
-  '/',
-  authMiddleware.authenticate,
-  studentController.getAllStudentsHandler
-);
-
-/**
- * GET /students/:id
- * Returns a single student by their StudentProfile ID.
- * Intended for Branch Admin / Super Admin.
- * Requires: valid JWT token
- */
-router.get(
-  '/:id',
-  authMiddleware.authenticate,
-  studentController.getStudentByIdHandler
-);
+router.delete("/delete/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN), studentController.deleteStudentProfileHandler);
 
 export const studentRoutes = router;
