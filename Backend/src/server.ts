@@ -2,6 +2,7 @@
 
 import dotenv from "dotenv";
 import app from "./app";
+import { seedSuperAdmin } from "./app/utils/seedAdmin";
 
 dotenv.config();
 
@@ -9,6 +10,7 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
+    await seedSuperAdmin();
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });

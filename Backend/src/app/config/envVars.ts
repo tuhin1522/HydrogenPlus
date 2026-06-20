@@ -23,6 +23,10 @@ interface EnvConfig {
   REFRESH_TOKEN_SECRET: string;
   ACCESS_TOKEN_EXPIRES: string;
   REFRESH_TOKEN_EXPIRES: string;
+
+  SUPER_ADMIN_EMAIL: string;
+  SUPER_ADMIN_PASSWORD: string;
+  SUPER_ADMIN_PHONE: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -45,6 +49,10 @@ const loadEnvVariables = (): EnvConfig => {
     "REFRESH_TOKEN_SECRET",
     "ACCESS_TOKEN_EXPIRES",
     "REFRESH_TOKEN_EXPIRES",
+
+    "SUPER_ADMIN_EMAIL",
+    "SUPER_ADMIN_PASSWORD",
+    "SUPER_ADMIN_PHONE",
   ];
 
   requiredVariable.forEach((variable) => {
@@ -75,6 +83,10 @@ const loadEnvVariables = (): EnvConfig => {
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string,
     ACCESS_TOKEN_EXPIRES: process.env.ACCESS_TOKEN_EXPIRES as string,
     REFRESH_TOKEN_EXPIRES: process.env.REFRESH_TOKEN_EXPIRES as string,
+
+    SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
+    SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
+    SUPER_ADMIN_PHONE: process.env.SUPER_ADMIN_PHONE as string,
   };
 };
 
