@@ -91,7 +91,7 @@ const getSubjectById = async (id: string) => {
   });
 
   if (!subject) {
-    throw new Error("Subject not found");
+    throw new AppError(status.NOT_FOUND, "Subject not found");
   }
 
   return subject;

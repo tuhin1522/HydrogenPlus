@@ -1,10 +1,8 @@
-export interface ICreateSubject {
+export interface ISubject {
+  id?: string;
   name: string;
+  code?: string | null;
   classLevelId: string;
-  code?: string;
-}
-
-export interface IUpdateSubject {
-  name?: string;
-  code?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
