@@ -64,8 +64,6 @@ ADD COLUMN     "batchSubjectId" TEXT NOT NULL;
 -- AlterTable
 ALTER TABLE "teacher_profiles" ADD COLUMN     "branchId" TEXT NOT NULL;
 
--- AlterTable
-ALTER TABLE "users" ADD COLUMN     "role" "UserRole" NOT NULL;
 
 -- CreateTable
 CREATE TABLE "branch_admin_profiles" (
