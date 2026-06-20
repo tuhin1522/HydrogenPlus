@@ -5,6 +5,8 @@ import nodemailer from 'nodemailer';
 import { prisma } from '../../lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { TOKEN_EXPIRY, AUTH_ERRORS } from './auth.constants';
+import { QueryBuilder } from "@/app/utils/queryBuilder";
+import { IQueryParams } from "@/app/interface/query.interface";
 
 // Configure nodemailer transporter for Gmail
 const transporter = nodemailer.createTransport({
@@ -383,8 +385,28 @@ const resetPassword = async (
   }
 };
 
-const getUser = async () => {
-  return await prisma.user.findMany();
+const getUser = async (query: IQueryParams) => {
+  const userQuery = new QueryBuilder(
+    prisma.user as any,
+    query,
+    {
+      searchableFields: ['name', 'email', 'phone'],
+      filterableFields: ['role', 'isActive'],
+    }
+  )
+    .search()
+    .filter()
+    .sort()
+    .paginate()
+    .fields()
+    .dynamicInclude({
+      studentProfile: true,
+      teacherProfile: true,
+      branchAdminProfile: true,
+    }, ['studentProfile', 'teacherProfile', 'branchAdminProfile']);
+
+  const result = await userQuery.execute();
+  return result;
 }
 
 

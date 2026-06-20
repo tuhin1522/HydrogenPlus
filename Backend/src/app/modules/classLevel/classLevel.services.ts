@@ -1,5 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { IClassLevel } from "./classLevel.interface";
+import { QueryBuilder } from "@/app/utils/queryBuilder";
+import { IQueryParams } from "@/app/interface/query.interface";
 
 const createClassLevel = async (payload: IClassLevel) => {
   const { name, branchId } = payload;
@@ -8,9 +10,28 @@ const createClassLevel = async (payload: IClassLevel) => {
   });
 };
 
-const getAllClassLevels = async () => {
-  const classLevels = await prisma.classLevel.findMany();
-  return classLevels;
+const getAllClassLevels = async (query: IQueryParams) => {
+  const classLevelQuery = new QueryBuilder(
+    prisma.classLevel as any,
+    query,
+    {
+      searchableFields: ['name'],
+      filterableFields: [],
+    }
+  )
+    .search()
+    .filter()
+    .sort()
+    .paginate()
+    .fields()
+    .dynamicInclude({
+      subjects: true,
+      batches: true,
+      courses: true,
+    }, ['subjects', 'batches', 'courses']);
+
+  const result = await classLevelQuery.execute();
+  return result;
 };
 
 const getClassLevelById = async (id: string) => {

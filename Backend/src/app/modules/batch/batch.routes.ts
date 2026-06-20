@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { batchController } from './batch.controller';
-import { batchValidation } from './batch.validation';
+import { BatchValidation } from './batch.validation';
+import { checkAuth } from '../../middleware/checkAuth';
+import { UserRole } from '@/generated/prisma';
+import { validateRequest } from '../../middleware/validateRequest';
 
 const router = Router();
 
@@ -10,8 +13,8 @@ const router = Router();
  */
 router.post(
   '/',
-  batchValidation.validateCreateBatch,
-  batchValidation.handleValidationErrors,
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
+  validateRequest(BatchValidation.createBatchZodSchema),
   batchController.createBatchHandler
 );
 
@@ -20,7 +23,7 @@ router.post(
  * Get all batches with optional filtering
  * Query params: branchId, classLevelId, status, skip, take
  */
-router.get('/', batchController.getAllBatchesHandler);
+router.get('/', checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER), batchController.getAllBatchesHandler);
 
 /**
  * GET /api/v1/batches/:id
@@ -28,8 +31,7 @@ router.get('/', batchController.getAllBatchesHandler);
  */
 router.get(
   '/:id',
-  batchValidation.validateBatchId,
-  batchValidation.handleValidationErrors,
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.STUDENT),
   batchController.getBatchByIdHandler
 );
 
@@ -39,8 +41,8 @@ router.get(
  */
 router.patch(
   '/:id',
-  batchValidation.validateUpdateBatch,
-  batchValidation.handleValidationErrors,
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
+  validateRequest(BatchValidation.updateBatchZodSchema),
   batchController.updateBatchHandler
 );
 
@@ -50,8 +52,7 @@ router.patch(
  */
 router.delete(
   '/:id',
-  batchValidation.validateBatchId,
-  batchValidation.handleValidationErrors,
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
   batchController.deleteBatchHandler
 );
 

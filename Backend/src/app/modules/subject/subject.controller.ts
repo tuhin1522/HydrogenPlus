@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
 import { catchAsync } from "@/app/shared/catchAsync";
 import { sendResponse } from "@/app/shared/sendResponse";
-import status from "http-status";
 import { subjectService } from "./subject.service";
+import status from "http-status";
 
 const createSubject = catchAsync(async (req: Request, res: Response) => {
-  const result = await subjectService.createSubject(req.body);
+  const subject = await subjectService.createSubject(req.body);
 
   sendResponse(res, {
     httpStatusCode: status.CREATED,
     success: true,
-    message: "Subject created successfully",
-    data: result,
+    message: "Subject created successfully!",
+    data: subject,
   });
 });
 
@@ -30,49 +30,37 @@ const getAllSubjects = catchAsync(async (req: Request, res: Response) => {
 
 const getSubjectById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await subjectService.getSubjectById(id as string);
+  const subject = await subjectService.getSubjectById(id as string);
 
   sendResponse(res, {
     httpStatusCode: status.OK,
     success: true,
-    message: "Subject retrieved successfully",
-    data: result,
-  });
-});
-
-const getSubjectsByClass = catchAsync(async (req: Request, res: Response) => {
-  const { classLevelId } = req.params;
-  const result = await subjectService.getSubjectsByClass(classLevelId as string);
-
-  sendResponse(res, {
-    httpStatusCode: status.OK,
-    success: true,
-    message: "Subjects retrieved successfully for class level",
-    data: result,
+    message: "Subject retrieved successfully!",
+    data: subject,
   });
 });
 
 const updateSubject = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await subjectService.updateSubject(id as string, req.body);
+  const subject = await subjectService.updateSubject(id as string, req.body);
 
   sendResponse(res, {
     httpStatusCode: status.OK,
     success: true,
-    message: "Subject updated successfully",
-    data: result,
+    message: "Subject updated successfully!",
+    data: subject,
   });
 });
 
 const deleteSubject = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await subjectService.deleteSubject(id as string);
+  const subject = await subjectService.deleteSubject(id as string);
 
   sendResponse(res, {
     httpStatusCode: status.OK,
     success: true,
-    message: "Subject deleted successfully",
-    data: result,
+    message: "Subject deleted successfully!",
+    data: subject,
   });
 });
 
@@ -80,7 +68,6 @@ export const subjectController = {
   createSubject,
   getAllSubjects,
   getSubjectById,
-  getSubjectsByClass,
   updateSubject,
   deleteSubject,
 };

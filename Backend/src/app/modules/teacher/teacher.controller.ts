@@ -17,13 +17,14 @@ const createTeacher = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllTeachers = catchAsync(async (req: Request, res: Response) => {
-  const teachers = await teacherService.getAllTeachers();
+  const teachers = await teacherService.getAllTeachers(req.query);
 
   sendResponse(res, {
     success: true,
     httpStatusCode: status.OK,
     message: 'Teachers Retrieved Successfully!',
-    data: teachers,
+    data: teachers.data,
+    meta: teachers.meta,
   })
 });
 

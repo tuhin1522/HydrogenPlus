@@ -407,4 +407,3 @@ model PasswordResetToken {
   @@unique([email, token])
   @@map("password_reset_token")
 }
-
