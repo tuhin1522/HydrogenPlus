@@ -68,6 +68,7 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
+  admin               Admin?
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -406,4 +407,23 @@ model PasswordResetToken {
 
   @@unique([email, token])
   @@map("password_reset_token")
+}
+
+model Admin {
+    id            String    @id @default(uuid(7))
+    name          String
+    email         String    @unique
+    profilePhoto  String?
+    contactNumber String?
+    isDeleted     Boolean   @default(false)
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+    deletedAt     DateTime?
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([email])
+    @@index([isDeleted])
+    @@map("admins")
 }
