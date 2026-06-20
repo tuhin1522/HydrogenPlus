@@ -9,7 +9,7 @@ const router = Router();
 
 router.post(
   "/create-student-profile",
-  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.STUDENT),
   validateRequest(StudentValidation.createStudentProfileZodSchema),
   studentController.createStudentProfile
 );
