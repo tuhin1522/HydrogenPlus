@@ -11,6 +11,13 @@ interface EnvConfig {
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   APP_URL: string;
+  JWT_SECRET: string;
+  EMAIL_HOST: string;
+  EMAIL_PORT: string;
+  EMAIL_SECURE: string;
+  EMAIL_USER: string;
+  EMAIL_PASS: string;
+  EMAIL_FROM: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -21,7 +28,14 @@ const loadEnvVariables = (): EnvConfig => {
     "BETTER_AUTH_SECRET",
     "BETTER_AUTH_URL",
     "APP_URL",
-    ];
+    "JWT_SECRET",
+    "EMAIL_HOST",
+    "EMAIL_PORT",
+    "EMAIL_SECURE",
+    "EMAIL_USER",
+    "EMAIL_PASS",
+    "EMAIL_FROM",
+  ];
 
   requiredVariable.forEach((variable) => {
     if (!process.env[variable]) {
@@ -39,6 +53,13 @@ const loadEnvVariables = (): EnvConfig => {
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET as string,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL as string,
     APP_URL: process.env.APP_URL as string,
+    JWT_SECRET: process.env.JWT_SECRET as string,
+    EMAIL_HOST: process.env.EMAIL_HOST as string,
+    EMAIL_PORT: process.env.EMAIL_PORT as string,
+    EMAIL_SECURE: process.env.EMAIL_SECURE as string,
+    EMAIL_USER: process.env.EMAIL_USER as string,
+    EMAIL_PASS: process.env.EMAIL_PASS as string,
+    EMAIL_FROM: process.env.EMAIL_FROM as string,
   };
 };
 

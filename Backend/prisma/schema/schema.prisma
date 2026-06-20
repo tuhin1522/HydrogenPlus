@@ -8,7 +8,7 @@ datasource db {
 }
 
 // ===== ENUMS =====
-// User roles
+
 enum UserRole {
   SUPER_ADMIN
   BRANCH_ADMIN
@@ -16,26 +16,22 @@ enum UserRole {
   STUDENT
 }
 
-// Branch status
 enum BranchStatus {
   ACTIVE
   INACTIVE
 }
 
-// Batch status
 enum BatchStatus {
   ACTIVE
   INACTIVE
 }
 
-// Course status
 enum CourseStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
 }
 
-// Days of week for routines
 enum DayOfWeek {
   SATURDAY
   SUNDAY
@@ -46,36 +42,309 @@ enum DayOfWeek {
   FRIDAY
 }
 
-// ===== MODELS =====
+//////////////////////////////////////////////////////////
+// USER
+//////////////////////////////////////////////////////////
 
-// Authentication and authorization models
 model User {
   id            String    @id @default(uuid())
+
   name          String?
   email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
-  password      String
 
+  password      String
   phone         String
 
-  role          UserRole  @default(STUDENT)
+  role          UserRole @default(STUDENT)
 
   isActive      Boolean   @default(true)
   lastLogin     DateTime?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  studentProfile StudentProfile?
-  teacherProfile TeacherProfile?
+  studentProfile     StudentProfile?
+  teacherProfile     TeacherProfile?
+  branchAdminProfile BranchAdminProfile?
 
   accounts      Account[]
   sessions      Session[]
 
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
   @@map("users")
 }
 
+//////////////////////////////////////////////////////////
+// BRANCH
+//////////////////////////////////////////////////////////
+
+model Branch {
+  id          String       @id @default(uuid())
+
+  name        String
+  managerName String
+  address     String
+  phone       String
+  email       String?
+
+  status      BranchStatus @default(ACTIVE)
+
+  batches     Batch[]
+  teachers    TeacherProfile[]
+  admins      BranchAdminProfile[]
+  routines    Routine[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("branches")
+}
+
+//////////////////////////////////////////////////////////
+// BRANCH ADMIN
+//////////////////////////////////////////////////////////
+
+model BranchAdminProfile {
+  id        String @id @default(uuid())
+
+  userId    String @unique
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  branchId  String
+  branch    Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([branchId])
+
+  @@map("branch_admin_profiles")
+}
+
+//////////////////////////////////////////////////////////
+// CLASS LEVEL
+//////////////////////////////////////////////////////////
+
+model ClassLevel {
+  id        String @id @default(uuid())
+
+  name      String @unique
+
+  batches   Batch[]
+  courses   Course[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("class_levels")
+}
+
+//////////////////////////////////////////////////////////
+// BATCH
+//////////////////////////////////////////////////////////
+
+model Batch {
+  id            String @id @default(uuid())
+
+  name          String
+
+  branchId      String
+  branch        Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  classLevelId  String
+  classLevel    ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+
+  capacity      Int
+
+  status        BatchStatus @default(ACTIVE)
+
+  students      StudentProfile[]
+  subjects      BatchSubject[]
+  routines      Routine[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([branchId, name])
+
+  @@index([branchId])
+  @@index([classLevelId])
+
+  @@map("batches")
+}
+
+//////////////////////////////////////////////////////////
+// STUDENT PROFILE
+//////////////////////////////////////////////////////////
+
+model StudentProfile {
+  id              String @id @default(uuid())
+
+  userId          String @unique
+  user            User @relation(fields: [userId], references: [id])
+
+  batchId         String
+  batch           Batch @relation(fields: [batchId], references: [id])
+
+  guardianName    String
+  guardianPhone   String
+
+  schoolName      String?
+  address         String?
+
+  admissionDate   DateTime
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([batchId])
+
+  @@map("student_profiles")
+}
+
+//////////////////////////////////////////////////////////
+// TEACHER PROFILE
+//////////////////////////////////////////////////////////
+
+model TeacherProfile {
+  id             String @id @default(uuid())
+
+  userId         String @unique
+  user           User @relation(fields: [userId], references: [id])
+
+  branchId       String
+  branch         Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  qualification  String?
+  experience     Int?
+  specialization String?
+  bio            String?
+
+  batchSubjects  BatchSubject[]
+  courses        Course[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([branchId])
+
+  @@map("teacher_profiles")
+}
+
+//////////////////////////////////////////////////////////
+// SUBJECT
+//////////////////////////////////////////////////////////
+
+model Subject {
+  id        String @id @default(uuid())
+
+  name      String @unique
+
+  batchSubjects BatchSubject[]
+  courses       Course[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subjects")
+}
+
+//////////////////////////////////////////////////////////
+// BATCH SUBJECT
+//////////////////////////////////////////////////////////
+
+model BatchSubject {
+  id         String @id @default(uuid())
+
+  batchId    String
+  batch      Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  subjectId  String
+  subject    Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  teacherId  String
+  teacher    TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  routines   Routine[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([batchId, subjectId])
+
+  @@index([batchId])
+  @@index([subjectId])
+  @@index([teacherId])
+
+  @@map("batch_subjects")
+}
+
+//////////////////////////////////////////////////////////
+// COURSE
+//////////////////////////////////////////////////////////
+
+model Course {
+  id            String @id @default(uuid())
+
+  title         String
+  description   String?
+
+  classLevelId  String
+  classLevel    ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+
+  subjectId     String
+  subject       Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  teacherId     String
+  teacher       TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  price         Float
+
+  status        CourseStatus @default(DRAFT)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([classLevelId])
+  @@index([subjectId])
+  @@index([teacherId])
+
+  @@map("courses")
+}
+
+//////////////////////////////////////////////////////////
+// ROUTINE
+//////////////////////////////////////////////////////////
+
+model Routine {
+  id             String @id @default(uuid())
+
+  branchId       String
+  branch         Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  batchId        String
+  batch          Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  batchSubjectId String
+  batchSubject   BatchSubject @relation(fields: [batchSubjectId], references: [id], onDelete: Cascade)
+
+  room           String
+
+  dayOfWeek      DayOfWeek
+
+  startTime      DateTime
+  endTime        DateTime
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([branchId])
+  @@index([batchId])
+  @@index([batchSubjectId])
+
+  @@map("routines")
+}
 
 model Session {
   id        String   @id
