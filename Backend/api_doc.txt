@@ -1,0 +1,278 @@
+HydrogenPlus API Documentation
+=============================
+Base URL: http://localhost:5000/api/v1
+Headers (for protected routes):
+Authorization: Bearer <your_jwt_token>
+
+==================================================
+1. AUTH MODULE
+Base: /auth
+==================================================
+- POST /auth/signup
+URL: http://localhost:5000/api/v1/auth/signup
+Body Example:
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "role": "STUDENT"
+}
+
+- POST /auth/login
+URL: http://localhost:5000/api/v1/auth/login
+Body Example:
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+
+- GET /auth/verify?token=ENTER_TOKEN_HERE
+URL: http://localhost:5000/api/v1/auth/verify?token=abc
+
+- POST /auth/resend-verification
+URL: http://localhost:5000/api/v1/auth/resend-verification
+Body Example:
+{
+  "email": "user@example.com"
+}
+
+- POST /auth/forgot-password
+URL: http://localhost:5000/api/v1/auth/forgot-password
+Body Example:
+{
+  "email": "user@example.com"
+}
+
+- POST /auth/reset-password
+URL: http://localhost:5000/api/v1/auth/reset-password
+Body Example:
+{
+  "token": "reset_token_here",
+  "newPassword": "newpassword123"
+}
+
+- GET /auth/get-all-users
+URL: http://localhost:5000/api/v1/auth/get-all-users
+
+
+==================================================
+2. BRANCH MODULE
+Base: /branches
+==================================================
+- POST /branches/create-branch
+URL: http://localhost:5000/api/v1/branches/create-branch
+Body Example:
+{
+  "name": "Main Branch",
+  "address": "123 Main St",
+  "contactEmail": "branch@example.com",
+  "contactPhone": "1234567890"
+}
+
+- GET /branches/all-branches
+URL: http://localhost:5000/api/v1/branches/all-branches
+
+- GET /branches/branch/:id
+URL: http://localhost:5000/api/v1/branches/branch/ENTER_ID_HERE
+
+- PATCH /branches/update/:id
+URL: http://localhost:5000/api/v1/branches/update/ENTER_ID_HERE
+Body Example:
+{
+  "name": "Updated Branch Name"
+}
+
+- DELETE /branches/delete/:id
+URL: http://localhost:5000/api/v1/branches/delete/ENTER_ID_HERE
+
+
+==================================================
+3. CLASS LEVEL MODULE
+Base: /class-levels
+==================================================
+- POST /class-levels/create-class-level
+URL: http://localhost:5000/api/v1/class-levels/create-class-level
+Body Example:
+{
+  "name": "Class 10"
+}
+
+- GET /class-levels/all-class-levels
+URL: http://localhost:5000/api/v1/class-levels/all-class-levels
+
+- GET /class-levels/class-level/:id
+URL: http://localhost:5000/api/v1/class-levels/class-level/ENTER_ID_HERE
+
+- PATCH /class-levels/update/:id
+URL: http://localhost:5000/api/v1/class-levels/update/ENTER_ID_HERE
+Body Example:
+{
+  "name": "Class 10 Science"
+}
+
+- DELETE /class-levels/delete/:id
+URL: http://localhost:5000/api/v1/class-levels/delete/ENTER_ID_HERE
+
+
+==================================================
+4. BATCH MODULE
+Base: /batches
+==================================================
+- POST /batches/
+URL: http://localhost:5000/api/v1/batches
+Body Example:
+{
+  "name": "Morning Batch A",
+  "classLevelId": "UUID_HERE",
+  "branchId": "UUID_HERE"
+}
+
+- GET /batches/
+URL: http://localhost:5000/api/v1/batches
+
+- GET /batches/:id
+URL: http://localhost:5000/api/v1/batches/ENTER_ID_HERE
+
+- PATCH /batches/:id
+URL: http://localhost:5000/api/v1/batches/ENTER_ID_HERE
+Body Example:
+{
+  "name": "Evening Batch B"
+}
+
+- DELETE /batches/:id
+URL: http://localhost:5000/api/v1/batches/ENTER_ID_HERE
+
+
+==================================================
+5. SUBJECT MODULE
+Base: /subjects
+==================================================
+- POST /subjects/
+URL: http://localhost:5000/api/v1/subjects
+Body Example:
+{
+  "name": "Physics",
+  "code": "PHY-101",
+  "classLevelId": "UUID_HERE"
+}
+
+- GET /subjects/
+URL: http://localhost:5000/api/v1/subjects
+
+- GET /subjects/:id
+URL: http://localhost:5000/api/v1/subjects/ENTER_ID_HERE
+
+- PATCH /subjects/:id
+URL: http://localhost:5000/api/v1/subjects/ENTER_ID_HERE
+Body Example:
+{
+  "name": "Advanced Physics"
+}
+
+- DELETE /subjects/:id
+URL: http://localhost:5000/api/v1/subjects/ENTER_ID_HERE
+
+
+==================================================
+6. TEACHER MODULE
+Base: /teachers
+==================================================
+- POST /teachers/create-teacher
+URL: http://localhost:5000/api/v1/teachers/create-teacher
+Body Example:
+{
+  "userId": "USER_UUID_HERE",
+  "firstName": "John",
+  "lastName": "Doe",
+  "phone": "0123456789"
+}
+
+- GET /teachers/all-teachers
+URL: http://localhost:5000/api/v1/teachers/all-teachers
+
+- GET /teachers/teacher/:id
+URL: http://localhost:5000/api/v1/teachers/teacher/ENTER_ID_HERE
+
+- PATCH /teachers/update/:id
+URL: http://localhost:5000/api/v1/teachers/update/ENTER_ID_HERE
+Body Example:
+{
+  "phone": "9876543210"
+}
+
+- DELETE /teachers/delete/:id
+URL: http://localhost:5000/api/v1/teachers/delete/ENTER_ID_HERE
+
+
+==================================================
+7. STUDENT MODULE
+Base: /students
+==================================================
+- POST /students/create-student-profile
+URL: http://localhost:5000/api/v1/students/create-student-profile
+Body Example:
+{
+  "userId": "USER_UUID_HERE",
+  "firstName": "Alice",
+  "lastName": "Smith",
+  "classLevelId": "CLASS_UUID_HERE"
+}
+
+- GET /students/my-profile
+URL: http://localhost:5000/api/v1/students/my-profile
+
+- GET /students/all-students
+URL: http://localhost:5000/api/v1/students/all-students
+
+- GET /students/:id
+URL: http://localhost:5000/api/v1/students/ENTER_ID_HERE
+
+- PATCH /students/update/:id
+URL: http://localhost:5000/api/v1/students/update/ENTER_ID_HERE
+Body Example:
+{
+  "firstName": "Alicia"
+}
+
+- DELETE /students/delete/:id
+URL: http://localhost:5000/api/v1/students/delete/ENTER_ID_HERE
+
+
+==================================================
+8. ROUTINE MODULE
+Base: /routines
+==================================================
+- POST /routines/generate
+URL: http://localhost:5000/api/v1/routines/generate
+Body Example:
+{
+  "branchId": "BRANCH_UUID_HERE",
+  "clearExisting": true
+}
+
+- DELETE /routines/branch/:branchId
+URL: http://localhost:5000/api/v1/routines/branch/ENTER_BRANCH_ID_HERE
+
+- GET /routines/batch/:batchId
+URL: http://localhost:5000/api/v1/routines/batch/ENTER_BATCH_ID_HERE
+
+- POST /routines/
+URL: http://localhost:5000/api/v1/routines
+Body Example:
+{
+  "dayOfWeek": "MONDAY",
+  "startTime": "09:00",
+  "endTime": "10:00",
+  "batchId": "BATCH_UUID_HERE",
+  "subjectId": "SUBJECT_UUID_HERE",
+  "teacherId": "TEACHER_UUID_HERE"
+}
+
+- GET /routines/
+URL: http://localhost:5000/api/v1/routines
+
+- GET /routines/:id
+URL: http://localhost:5000/api/v1/routines/ENTER_ID_HERE
+
+- DELETE /routines/:id
+URL: http://localhost:5000/api/v1/routines/ENTER_ID_HERE
