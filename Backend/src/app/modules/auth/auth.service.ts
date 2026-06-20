@@ -141,6 +141,7 @@ const signupUser = async (
         phone,
         password: hashedPassword,
         emailVerified: false,
+        role: 'STUDENT', // Default role for self-registration
       },
     });
 
@@ -240,6 +241,7 @@ const loginUser = async (
       {
         userId: user.id,
         email: user.email,
+        role: user.role,
       },
       process.env.JWT_SECRET!,
       { expiresIn: '7d' }
@@ -381,6 +383,10 @@ const resetPassword = async (
   }
 };
 
+const getUser = async () => {
+  return await prisma.user.findMany();
+}
+
 
 export const authService = {
   signupUser,
@@ -390,4 +396,5 @@ export const authService = {
   sendPasswordResetEmail,
   forgotPassword,
   resetPassword,
+  getUser
 };

@@ -42,5 +42,7 @@ router.post('/forgot-password', authValidation.validateForgotPassword, authValid
  */
 router.post('/reset-password', authValidation.validateResetPassword, authValidation.handleValidationErrors, authController.resetPasswordHandler);
 
+router.get('/get-all-users', authController.getUser);
+
 
 export const authRoutes = router;
