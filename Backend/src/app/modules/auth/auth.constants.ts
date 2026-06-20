@@ -23,8 +23,11 @@ export const AUTH_ERRORS = {
   EMAIL_NOT_VERIFIED: 'Please verify your email before logging in',
   INVALID_CREDENTIALS: 'Invalid email or password',
   INVALID_TOKEN: 'Verification token is invalid or expired',
+  INVALID_RESET_TOKEN: 'Password reset link is invalid or expired',
+  USER_NOT_FOUND: 'No account found with this email address',
 };
 
 export const TOKEN_EXPIRY = {
   VERIFICATION_TOKEN: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+  RESET_TOKEN: 1 * 60 * 60 * 1000, // 1 hour in milliseconds
 };
