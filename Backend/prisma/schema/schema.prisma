@@ -131,12 +131,14 @@ model ClassLevel {
 
   name      String @unique
 
-  subjects  Subject[]
   batches   Batch[]
   courses   Course[]
+  subjects  Subject[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("class_levels")
 }
 
 //////////////////////////////////////////////////////////
@@ -242,7 +244,7 @@ model Subject {
   code          String?
 
   classLevelId  String
-  classLevel    ClassLevel @relation(fields: [classLevelId], references: [id])
+  classLevel    ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
 
   batchSubjects BatchSubject[]
   courses       Course[]
@@ -251,6 +253,7 @@ model Subject {
   updatedAt     DateTime @updatedAt
 
   @@unique([classLevelId, name])
+  @@map("subjects")
 }
 
 //////////////////////////////////////////////////////////

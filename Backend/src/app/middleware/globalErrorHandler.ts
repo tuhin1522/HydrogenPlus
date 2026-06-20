@@ -4,6 +4,7 @@ import z from "zod";
 import { envVars } from "../config/envVars";
 import { TErrorResponse, TErrorSources } from "../interface/error.interface";
 import { handleZodError } from "../errorHelpers/handleZodError";
+import AppError from "../errorHelpers/appError";
 // import { deleteFileFromCloudinary } from "../config/cloudinary.config";
 
 export const globalErrorHandler = async (
@@ -43,6 +44,10 @@ export const globalErrorHandler = async (
     statusCode = simplifiedError.statusCode as number;
     message = simplifiedError.message
     errorSources = [...simplifiedError.errorSources];
+    stack = err.stack;
+  } else if (err instanceof AppError) {
+    statusCode = err.statusCode;
+    message = err.message;
     stack = err.stack;
   } else if (err instanceof Error) {
     statusCode = status.INTERNAL_SERVER_ERROR;
