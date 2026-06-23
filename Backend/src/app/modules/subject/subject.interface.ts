@@ -1,6 +1,7 @@
 export interface ICreateSubject {
   name: string;
   classLevelId: string;
+  code: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

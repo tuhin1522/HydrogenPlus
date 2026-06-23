@@ -2,6 +2,8 @@ import { prisma } from "@/app/lib/prisma";
 import { QueryBuilder } from "@/app/utils/queryBuilder";
 import { IQueryParams } from "@/app/interface/query.interface";
 import { ICreateSubject, IUpdateSubject } from "./subject.interface";
+import AppError from "@/app/errorHelpers/appError";
+import status from "http-status";
 
 const createSubject = async (payload: ICreateSubject) => {
   const { name, classLevelId, code } = payload;
@@ -12,7 +14,6 @@ const createSubject = async (payload: ICreateSubject) => {
   if (!classLevel) {
     throw new Error("Class level not found");
   }
-
   // Prevent duplicate subject within the same class level
   const existing = await (prisma.subject as any).findFirst({
     where: { name, classLevelId },

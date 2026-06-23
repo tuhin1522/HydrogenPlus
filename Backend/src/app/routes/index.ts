@@ -7,6 +7,7 @@ import { classLevelRoutes } from "../modules/classLevel/classLevel.routes";
 import { teacherRoutes } from "../modules/teacher/teacher.routes";
 import { subjectRoutes } from "../modules/subject/subject.routes";
 import { routineRoutes } from "../modules/routine/routine.routes";
+import { batchSubjectRoutes } from "../modules/batchSubject/batchSubject.routes";
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use("/batches", batchRoutes);
 router.use("/teachers", teacherRoutes);
 router.use("/subjects", subjectRoutes);
 router.use("/routines", routineRoutes);
+router.use("/batch-subjects", batchSubjectRoutes);
 
 export const indexRoutes = router;
