@@ -6,7 +6,11 @@ import { IQueryParams } from "@/app/interface/query.interface";
 const createTeacherProfile = async (teacherData: ICreateTeacher) => {
     const teacher = await prisma.teacherProfile.create({
         data: teacherData,
-    })
+    });
+    await prisma.user.update({
+        where: { id: teacherData.userId },
+        data: { role: 'TEACHER' },
+    });
     return teacher;
 };
 
