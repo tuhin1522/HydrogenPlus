@@ -2,8 +2,18 @@ import { prisma } from "@/app/lib/prisma";
 import { ICreateTeacher } from "./teacher.interface";
 import { QueryBuilder } from "@/app/utils/queryBuilder";
 import { IQueryParams } from "@/app/interface/query.interface";
+import AppError from "@/app/errorHelpers/appError";
+import httpStatus from "http-status";
 
 const createTeacherProfile = async (teacherData: ICreateTeacher) => {
+    const isTeacherExist = await prisma.teacherProfile.findUnique({
+        where: { userId: teacherData.userId }
+    });
+
+    if (isTeacherExist) {
+        throw new AppError(httpStatus.CONFLICT, `Teacher profile for this user already exists.`);
+    }
+
     const teacher = await prisma.teacherProfile.create({
         data: teacherData,
     });
@@ -47,10 +57,33 @@ const getAllTeachers = async (query: IQueryParams) => {
 };
 
 const getTeacherById = async (id: string) => {
-    const teacher = await prisma.teacherProfile.findUnique({
-        where: { id },
-    });
-    return teacher;
+    const teacherQuery = new QueryBuilder(
+        prisma.teacherProfile as any,
+        {},
+        {}
+    )
+    .where({
+        OR: [
+            { id: id },
+            { userId: id }
+        ]
+    })
+    .dynamicInclude({
+        user: {
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+                isActive: true,
+            }
+        },
+        branch: true
+    }, ['user', 'branch']);
+
+    const result = await teacherQuery.execute();
+    return result.data[0] || null;
 };
 
 const updateTeacherProfile = async (id: string, teacherData: Partial<ICreateTeacher>) => {
