@@ -108,17 +108,6 @@ const resetPasswordHandler = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getUser = catchAsync(async(req:Request,res:Response)=>{
-  const result = await authService.getUser(req.query);
-  sendResponse(res, {
-    httpStatusCode: 200,
-    success: true,
-    message: 'User fetched successfully.',
-    data: result.data,
-    meta: result.meta,
-  });
-}) 
-
 export const authController = {
   signupHandler,
   loginHandler,
@@ -126,5 +115,4 @@ export const authController = {
   resendVerificationHandler,
   forgotPasswordHandler,
   resetPasswordHandler,
-  getUser,
 };

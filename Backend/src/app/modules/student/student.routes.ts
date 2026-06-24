@@ -13,15 +13,16 @@ router.post(
   validateRequest(StudentValidation.createStudentProfileZodSchema),
   studentController.createStudentProfile
 );
-router.get("/my-profile", checkAuth(UserRole.STUDENT), studentController.getMyProfileHandler);
-router.get("/all-students", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER), studentController.getAllStudentsHandler);
-router.get("/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER), studentController.getStudentByIdHandler);
+router.get("/my-profile", checkAuth(UserRole.STUDENT), studentController.getMyProfile);
+router.get("/all-students", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER), studentController.getAllStudents);
+router.get("student/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN), studentController.getStudentById);
+router.patch("/update-my-profile", checkAuth(UserRole.STUDENT), validateRequest(StudentValidation.updateStudentProfileZodSchema), studentController.updateMyprofile);
 router.patch(
   "/update/:id",
-  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.STUDENT),
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
   validateRequest(StudentValidation.updateStudentProfileZodSchema),
-  studentController.updateMyProfileHandler
+  studentController.updateProfilebyId
 );
-router.delete("/delete/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN), studentController.deleteStudentProfileHandler);
+router.delete("/delete/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN), studentController.deleteStudentProfile);
 
 export const studentRoutes = router;

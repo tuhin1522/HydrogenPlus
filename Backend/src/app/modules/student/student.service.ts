@@ -18,9 +18,24 @@ const createStudentProfile = async (data: ICreateStudentProfile) => {
 };
 
 const getMyProfile = async (userId: string) => {
-  return await prisma.studentProfile.findUnique({
-    where: { userId },
-  });
+  const queryBuilder = new QueryBuilder(prisma.studentProfile as any, {}, {});
+  queryBuilder
+    .where({ userId })
+    .dynamicInclude({
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          role: true,
+          isActive: true,
+        }
+      },
+      batch: true,
+    }, ['user', 'batch']);
+  const result = await queryBuilder.execute();
+  return result.data[0] || null;  
 };
 
 const getAllStudents = async (query: IQueryParams) => {
@@ -61,7 +76,14 @@ const getStudentById = async (id: string) => {
   });
 };
 
-const updateMyProfile = async (id: string, data: Partial<ICreateStudentProfile>) => {
+const updateMyProfile = async (userId: string, data: Partial<ICreateStudentProfile>) => {
+  return await prisma.studentProfile.update({
+    where: { userId },
+    data,
+  });
+};
+
+const updateProfilebyId = async (id: string, data: Partial<ICreateStudentProfile>) => {
   return await prisma.studentProfile.update({
     where: { id },
     data,
@@ -80,5 +102,6 @@ export const studentService = {
   getAllStudents,
   getStudentById,
   updateMyProfile,
+  updateProfilebyId,
   deleteStudentProfile,
 };
