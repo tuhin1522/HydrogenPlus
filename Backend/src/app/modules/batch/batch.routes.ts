@@ -12,7 +12,7 @@ const router = Router();
  * Create a new batch
  */
 router.post(
-  '/',
+  '/create-batch',
   checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
   validateRequest(BatchValidation.createBatchZodSchema),
   batchController.createBatchHandler
@@ -30,7 +30,7 @@ router.get('/', checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.
  * Get batch by ID
  */
 router.get(
-  '/:id',
+  '/batch/:id',
   checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.STUDENT),
   batchController.getBatchByIdHandler
 );
@@ -40,7 +40,7 @@ router.get(
  * Update batch
  */
 router.patch(
-  '/:id',
+  '/update/:id',
   checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
   validateRequest(BatchValidation.updateBatchZodSchema),
   batchController.updateBatchHandler
@@ -51,7 +51,7 @@ router.patch(
  * Delete batch
  */
 router.delete(
-  '/:id',
+  '/delete/:id',
   checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
   batchController.deleteBatchHandler
 );

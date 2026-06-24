@@ -21,20 +21,20 @@ router.get(
 );
 
 router.get(
-  "/:id",
+  "/subject/:id",
   checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.STUDENT),
   subjectController.getSubjectById
 );
 
 router.patch(
-  "/:id",
+  "/update/:id",
   checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
   validateRequest(SubjectValidation.updateSubjectZodSchema),
   subjectController.updateSubject
 );
 
 router.delete(
-  "/:id",
+  "/delete/:id",
   checkAuth(UserRole.SUPER_ADMIN),
   subjectController.deleteSubject
 );
