@@ -8,6 +8,7 @@ import { teacherRoutes } from "../modules/teacher/teacher.routes";
 import { subjectRoutes } from "../modules/subject/subject.routes";
 import { routineRoutes } from "../modules/routine/routine.routes";
 import { batchSubjectRoutes } from "../modules/batchSubject/batchSubject.routes";
+import { branchAdminRoutes } from "../modules/branchAdmin/branchAdmin.routes";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use("/teachers", teacherRoutes);
 router.use("/subjects", subjectRoutes);
 router.use("/routines", routineRoutes);
 router.use("/batch-subjects", batchSubjectRoutes);
+router.use("/branch-admins", branchAdminRoutes);
 
 export const indexRoutes = router;

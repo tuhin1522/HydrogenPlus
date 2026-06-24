@@ -3,8 +3,23 @@ import { ICreateBranch } from "./branch.interface";
 import { QueryBuilder } from "@/app/utils/queryBuilder";
 import { IQueryParams } from "@/app/interface/query.interface";
 
+import AppError from "@/app/errorHelpers/appError";
+import httpStatus from "http-status";
+
 const createBranch = async (payload: ICreateBranch) => {
     const { name, address, phone, email, status, managerName } = payload;
+    
+    const isBranchExist = await prisma.branch.findFirst({
+        where: { 
+            name,
+            address
+        }
+    });
+
+    if (isBranchExist) {
+        throw new AppError(httpStatus.CONFLICT, `A branch with the name '${name}' at address '${address}' already exists.`);
+    }
+
     await prisma.branch.create({
         data: payload
     });

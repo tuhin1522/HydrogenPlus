@@ -147,18 +147,27 @@ const signupUser = async (
       },
     });
 
-    // Generate verification token
-    const verificationToken = await generateVerificationToken(email);
+    try {
+      // Generate verification token
+      const verificationToken = await generateVerificationToken(email);
 
-    // Send verification email
-    await sendVerificationEmail(email, name, verificationToken);
+      // Send verification email
+      await sendVerificationEmail(email, name, verificationToken);
 
-    return {
-      success: true,
-      message:
-        'Signup successful! Check your email to verify your account.',
-      userId: user.id,
-    };
+
+
+      return {
+        success: true,
+        message:
+          'Signup successful! Check your email to verify your account.',
+        userId: user.id,
+      };
+    } catch (emailError: any) {
+      // Rollback if email fails to send
+      await prisma.verificationToken.deleteMany({ where: { email } });
+      await prisma.user.delete({ where: { id: user.id } });
+      throw new Error(`Unable to send verification email (${emailError.message}). Please check your connection and try again.`);
+    }
   } catch (error: any) {
     throw new Error(`Signup failed: ${error.message}`);
   }
@@ -385,31 +394,6 @@ const resetPassword = async (
   }
 };
 
-const getUser = async (query: IQueryParams) => {
-  const userQuery = new QueryBuilder(
-    prisma.user as any,
-    query,
-    {
-      searchableFields: ['name', 'email', 'phone'],
-      filterableFields: ['role', 'isActive'],
-    }
-  )
-    .search()
-    .filter()
-    .sort()
-    .paginate()
-    .fields()
-    .dynamicInclude({
-      studentProfile: true,
-      teacherProfile: true,
-      branchAdminProfile: true,
-    }, ['studentProfile', 'teacherProfile', 'branchAdminProfile']);
-
-  const result = await userQuery.execute();
-  return result;
-}
-
-
 export const authService = {
   signupUser,
   verifyEmail,
@@ -418,5 +402,4 @@ export const authService = {
   sendPasswordResetEmail,
   forgotPassword,
   resetPassword,
-  getUser
 };

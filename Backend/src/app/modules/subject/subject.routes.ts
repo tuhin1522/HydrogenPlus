@@ -8,7 +8,7 @@ import { SubjectValidation } from "./subject.validation";
 const router = Router();
 
 router.post(
-  "/createSubject",
+  "/create-subject",
   checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
   validateRequest(SubjectValidation.createSubjectZodSchema),
   subjectController.createSubject

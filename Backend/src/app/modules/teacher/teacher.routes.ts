@@ -15,10 +15,12 @@ router.post(
   teacherController.createTeacher
 );
 router.get("/all-teachers", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN), teacherController.getAllTeachers);
-router.get("/teacher/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER), teacherController.getTeacherById);
+router.get("/my-profile", checkAuth(UserRole.TEACHER), teacherController.getMyProfile);
+router.get("/teacher/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN), teacherController.getTeacherById);
+router.patch("/update-my-profile", checkAuth(UserRole.TEACHER), validateRequest(TeacherValidation.updateTeacherZodSchema), teacherController.updateMyProfile);
 router.patch(
   "/update/:id",
-  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER),
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
   validateRequest(TeacherValidation.updateTeacherZodSchema),
   teacherController.updateTeacher
 );

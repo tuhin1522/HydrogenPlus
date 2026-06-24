@@ -4,11 +4,11 @@ import { z } from "zod";
 export const validateRequest = (zodSchema: z.ZodType<any>) => {
   return (req: Request, res: Response, next: NextFunction) => {
 
-    if (req.body.data) {
+    if (req.body && req.body.data) {
       req.body = JSON.parse(req.body.data);
     }
 
-    const parseResult = zodSchema.safeParse(req.body);
+    const parseResult = zodSchema.safeParse(req.body || {});
 
     if (!parseResult.success) {
       return next(parseResult.error);

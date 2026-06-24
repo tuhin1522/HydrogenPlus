@@ -112,13 +112,15 @@ model BranchAdminProfile {
   userId    String @unique
   user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  branchId  String
+  branchId  String @unique
   branch    Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  joiningDate DateTime?
+
+  designation String? @default("Branch Admin")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([branchId])
 
   @@map("branch_admin_profiles")
 }
