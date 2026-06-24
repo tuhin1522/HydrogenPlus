@@ -33,27 +33,54 @@ const getAllTeachers = async (query: IQueryParams) => {
             filterableFields: ['branchId', 'userId'],
         }
     )
-    .search()
-    .filter()
-    .sort()
-    .paginate()
-    .fields()
-    .dynamicInclude({
-        user: {
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-                role: true,
-                isActive: true,
-            }
-        },
-        branch: true,
-    }, ['user', 'branch']);
+        .search()
+        .filter()
+        .sort()
+        .paginate()
+        .fields()
+        .dynamicInclude({
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                    role: true,
+                    isActive: true,
+                }
+            },
+            branch: true,
+        }, ['user', 'branch']);
 
     const result = await teacherQuery.execute();
     return result;
+};
+
+const getMyProfile = async (userId: string) => {
+    const teacherQuery = new QueryBuilder(
+        prisma.teacherProfile as any,
+        {},
+        {}
+    )
+        .where({
+            userId: userId
+        })
+        .dynamicInclude({
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                    role: true,
+                    isActive: true,
+                }
+            },
+            branch: true
+        }, ['user', 'branch']);
+
+    const result = await teacherQuery.execute();
+    return result.data[0] || null;
 };
 
 const getTeacherById = async (id: string) => {
@@ -62,28 +89,36 @@ const getTeacherById = async (id: string) => {
         {},
         {}
     )
-    .where({
-        OR: [
-            { id: id },
-            { userId: id }
-        ]
-    })
-    .dynamicInclude({
-        user: {
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-                role: true,
-                isActive: true,
-            }
-        },
-        branch: true
-    }, ['user', 'branch']);
+        .where({
+            OR: [
+                { id: id },
+                { userId: id }
+            ]
+        })
+        .dynamicInclude({
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                    role: true,
+                    isActive: true,
+                }
+            },
+            branch: true
+        }, ['user', 'branch']);
 
     const result = await teacherQuery.execute();
     return result.data[0] || null;
+};
+
+const updateMyProfile = async (userId: string, teacherData: Partial<ICreateTeacher>) => {
+    const teacher = await prisma.teacherProfile.update({
+        where: { userId },
+        data: teacherData,
+    });
+    return teacher;
 };
 
 const updateTeacherProfile = async (id: string, teacherData: Partial<ICreateTeacher>) => {
@@ -104,7 +139,9 @@ const deleteTeacherProfile = async (id: string) => {
 export const teacherService = {
     createTeacherProfile,
     getAllTeachers,
+    getMyProfile,
     getTeacherById,
+    updateMyProfile,
     updateTeacherProfile,
     deleteTeacherProfile,
 };

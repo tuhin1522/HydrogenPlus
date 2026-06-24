@@ -28,6 +28,18 @@ const getAllTeachers = catchAsync(async (req: Request, res: Response) => {
   })
 });
 
+const getMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const teacher = await teacherService.getMyProfile(user?.userId as string);
+
+  sendResponse(res, {
+    success: true,
+    httpStatusCode: status.OK,
+    message: 'My Profile Retrieved Successfully!',
+    data: teacher,
+  })
+});
+
 const getTeacherById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const teacher = await teacherService.getTeacherById(id as string);
@@ -36,6 +48,19 @@ const getTeacherById = catchAsync(async (req: Request, res: Response) => {
     success: true,
     httpStatusCode: status.OK,
     message: 'Teacher Retrieved Successfully!',
+    data: teacher,
+  })
+});
+
+const updateMyProfile = catchAsync(async(req:Request, res:Response) => {
+  const user = req.user;
+  const payload = req.body;
+  const teacher = await teacherService.updateMyProfile(user?.userId as string, payload);
+
+  sendResponse(res, {
+    success: true,
+    httpStatusCode: status.OK,
+    message: 'My Profile Updated Successfully!',
     data: teacher,
   })
 });
@@ -68,7 +93,9 @@ const deleteTeacher = catchAsync(async (req: Request, res: Response) => {
 export const teacherController = {
   createTeacher,
   getAllTeachers,
+  getMyProfile,
   getTeacherById,
+  updateMyProfile,
   updateTeacher,
   deleteTeacher,
 };
