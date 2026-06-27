@@ -96,7 +96,7 @@ export default function Home() {
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Ready to begin?</p>
               <h2 className="mt-2 text-2xl font-semibold text-foreground">Join your next batch and grow with confidence.</h2>
             </div>
-            <a href="mailto:admissions@edubranchpro.com" className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90">
+            <a href="mailto:admissions@hydrogenplus.com" className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90">
               Book a Free Counseling Session
             </a>
           </div>

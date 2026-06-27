@@ -4,7 +4,7 @@
 
 # ⚡ HydrogenPlus
 
-### Multi-Branch Education Management Platform
+### Multi-Branch Coaching Center Management Platform
 
 *A centralized, role-based EdTech platform for coaching & tutoring institutions — unifying student management, content delivery, exams, payments, and analytics across 5 branches.*
 

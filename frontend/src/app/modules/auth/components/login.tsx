@@ -30,7 +30,7 @@ export default function LoginForm() {
         setMessage("Please enter a valid email and a password with at least 6 characters.");
       } else {
         setStatus("success");
-        setMessage("Signed in successfully. Welcome back to EduBranch Pro.");
+        setMessage("Signed in successfully. Welcome back to Hydrogen Plus.");
       }
       setLoading(false);
     }, 900);

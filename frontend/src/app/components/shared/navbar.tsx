@@ -82,9 +82,9 @@ export default function Navbar() {
           </div>
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
-              EduBranch Pro
+              Hydrogen Plus
             </p>
-            <p className={`text-sm ${muted}`}>Multi-branch EdTech platform</p>
+            <p className={`text-sm ${muted}`}>Multi-branch Coaching platform</p>
           </div>
         </Link>
 

@@ -20,7 +20,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.6fr_0.6fr] lg:px-8">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
-            EduBranch Pro
+            Hydrogen Plus
           </p>
           <h3 className="mt-3 text-2xl font-semibold text-foreground">A modern coaching center for ambitious learners.</h3>
           <p className="mt-3 max-w-md text-sm leading-7 text-muted-foreground">
@@ -56,7 +56,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-border px-4 py-4 text-center text-sm text-muted-foreground sm:px-6 lg:px-8">
-        © 2026 EduBranch Pro. All rights reserved.
+        © 2026 Hydrogen Plus Coaching Center. All rights reserved.
       </div>
     </footer>
   );

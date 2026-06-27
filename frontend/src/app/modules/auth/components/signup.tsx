@@ -39,7 +39,7 @@ export default function Signup() {
         setMessage("Please agree to the Terms & Conditions.");
       } else {
         setStatus("success");
-        setMessage("Account created successfully. Welcome to EduBranch Pro.");
+        setMessage("Account created successfully. Welcome to Hydrogen Plus.");
       }
       setLoading(false);
     }, 800);
