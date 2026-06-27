@@ -12,11 +12,11 @@ export default function LoginForm() {
   const [message, setMessage] = useState("");
 
   const passwordStrength = useMemo(() => {
-    if (!password) return { label: "Enter password", color: "bg-[#1D3E3E]" };
+    if (!password) return { label: "Enter password", color: "bg-muted" };
     const score = [/.{8,}/.test(password), /[A-Z]/.test(password), /[0-9]/.test(password)].filter(Boolean).length;
-    if (score === 3) return { label: "Strong", color: "bg-[#2BCA7A]" };
-    if (score === 2) return { label: "Medium", color: "bg-[#86F05C]" };
-    return { label: "Weak", color: "bg-[#EF4343]" };
+    if (score === 3) return { label: "Strong", color: "bg-success" };
+    if (score === 2) return { label: "Medium", color: "bg-primary" };
+    return { label: "Weak", color: "bg-error" };
   }, [password]);
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -46,7 +46,7 @@ export default function LoginForm() {
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="email" className="mb-2 block text-sm font-medium text-[#F3F7F6]">
+          <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">
             Email address
           </label>
           <input
@@ -55,13 +55,13 @@ export default function LoginForm() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="teacher@northview.edu"
-            className="w-full rounded-2xl border border-[#1D3E3E] bg-[#081717] px-4 py-3 text-sm text-[#F3F7F6] outline-none transition focus:border-[#86F05C] focus:ring-2 focus:ring-[#86F05C]"
+            className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="mb-2 block text-sm font-medium text-[#F3F7F6]">
+          <label htmlFor="password" className="mb-2 block text-sm font-medium text-foreground">
             Password
           </label>
           <input
@@ -70,37 +70,37 @@ export default function LoginForm() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="••••••••"
-            className="w-full rounded-2xl border border-[#1D3E3E] bg-[#081717] px-4 py-3 text-sm text-[#F3F7F6] outline-none transition focus:border-[#86F05C] focus:ring-2 focus:ring-[#86F05C]"
+            className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary"
             required
           />
           <div className="mt-3">
-            <div className="mb-2 flex items-center justify-between text-xs text-[#A9B7B4]">
+            <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
               <span>Password strength</span>
               <span>{passwordStrength.label}</span>
             </div>
-            <div className="h-2 rounded-full bg-[#0D2A2B]">
+            <div className="h-2 rounded-full bg-secondary">
               <div className={`h-2 rounded-full ${passwordStrength.color}`} style={{ width: password.length ? "100%" : "0%" }} />
             </div>
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-3 text-sm">
-          <label className="flex items-center gap-2 text-[#A9B7B4]">
+          <label className="flex items-center gap-2 text-muted-foreground">
             <input
               type="checkbox"
               checked={remember}
               onChange={() => setRemember((prev) => !prev)}
-              className="h-4 w-4 rounded border-[#1D3E3E] bg-[#081717] text-[#86F05C] focus:ring-[#86F05C]"
+              className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-primary"
             />
             Remember me
           </label>
-          <a href="/forgot-password" className="font-medium text-[#86F05C] transition hover:text-[#B7FF63]">
+          <a href="/forgot-password" className="font-medium text-primary transition hover:opacity-80">
             Forgot password?
           </a>
         </div>
 
         {status !== "idle" && (
-          <div className={`rounded-2xl border px-4 py-3 text-sm ${status === "error" ? "border-[#EF4343]/50 bg-[#EF4343]/10 text-[#EF4343]" : "border-[#2BCA7A]/50 bg-[#2BCA7A]/10 text-[#2BCA7A]"}`}>
+          <div className={`rounded-2xl border px-4 py-3 text-sm ${status === "error" ? "border-error/50 bg-error/10 text-error" : "border-success/50 bg-success/10 text-success"}`}>
             {message}
           </div>
         )}
@@ -108,22 +108,22 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#B7FF63] via-[#86F05C] to-[#0E8B6E] px-4 py-3 text-sm font-semibold text-[#081717] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-[#1D3E3E]" />
-          <span className="text-xs uppercase tracking-[0.24em] text-[#A9B7B4]">or continue with</span>
-          <div className="h-px flex-1 bg-[#1D3E3E]" />
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs uppercase tracking-[0.24em] text-muted-foreground">or continue with</span>
+          <div className="h-px flex-1 bg-border" />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <button type="button" className="rounded-2xl border border-[#1D3E3E] bg-[#081717] px-4 py-3 text-sm font-medium text-[#F3F7F6] transition hover:bg-[#0D2A2B]">
+          <button type="button" className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary">
             Google
           </button>
-          <button type="button" className="rounded-2xl border border-[#1D3E3E] bg-[#081717] px-4 py-3 text-sm font-medium text-[#F3F7F6] transition hover:bg-[#0D2A2B]">
+          <button type="button" className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary">
             Microsoft
           </button>
         </div>

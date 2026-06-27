@@ -3,17 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-type ThemeMode = "dark" | "light";
-
 type NavItem = {
   label: string;
   href?: string;
   items?: string[];
-};
-
-type NavbarProps = {
-  theme: ThemeMode;
-  toggleTheme: () => void;
 };
 
 const desktopMenu: NavItem[] = [
@@ -40,9 +33,31 @@ const desktopMenu: NavItem[] = [
   { label: "Contact", href: "#contact" },
 ];
 
-export default function Navbar({ theme, toggleTheme }: NavbarProps) {
+export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    // Check initial theme
+    if (typeof document !== "undefined") {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDark((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -51,45 +66,40 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isDark = theme === "dark";
-  const shell = isDark
-    ? "bg-[#081717]/80 text-[#F3F7F6] border-[#1D3E3E]"
-    : "bg-white/80 text-[#081717] border-[#D7ECE4]";
-  const hover = isDark ? "hover:bg-[#0D2A2B]" : "hover:bg-[#F4FFF8]";
-  const muted = isDark ? "text-[#A9B7B4]" : "text-[#4B5A58]";
-  const accent = "bg-gradient-to-r from-[#B7FF63] via-[#86F05C] to-[#0E8B6E]";
+  const hover = "hover:bg-secondary";
+  const muted = "text-muted-foreground";
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-300 ${shell} ${
-        scrolled ? "shadow-[0_12px_35px_rgba(0,0,0,0.2)]" : "shadow-none"
+      className={`sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl text-foreground transition-all duration-300 ${
+        scrolled ? "shadow-md" : "shadow-none"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
-          <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${accent}`}>
-            <span className="text-sm font-semibold text-[#081717]">EP</span>
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary">
+            <span className="text-sm font-semibold text-primary-foreground">EP</span>
           </div>
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#86F05C]">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
               EduBranch Pro
             </p>
             <p className={`text-sm ${muted}`}>Multi-branch EdTech platform</p>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+        <nav className="hidden items-center gap-1 xl:flex" aria-label="Primary navigation">
           {desktopMenu.map((item) => (
             <div key={item.label} className="group relative">
               {item.items ? (
                 <>
                   <button
                     type="button"
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${hover}`}
+                    className={`rounded-full px-3 py-2 text-sm font-medium transition ${hover}`}
                   >
                     {item.label}
                   </button>
-                  <div className="pointer-events-none absolute left-1/2 top-full mt-3 w-64 -translate-x-1/2 rounded-2xl border border-[#1D3E3E] bg-[#0A2324]/95 p-3 opacity-0 shadow-2xl transition group-hover:pointer-events-auto group-hover:opacity-100">
+                  <div className="pointer-events-none absolute left-1/2 top-full mt-3 w-64 -translate-x-1/2 rounded-2xl border border-border bg-card p-3 opacity-0 shadow-2xl transition group-hover:pointer-events-auto group-hover:opacity-100">
                     <div className="grid gap-2">
                       {item.items.map((entry) => (
                         <Link
@@ -106,7 +116,7 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
               ) : (
                 <Link
                   href={item.href ?? "#"}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${hover}`}
+                  className={`rounded-full px-3 py-2 text-sm font-medium transition ${hover}`}
                 >
                   {item.label}
                 </Link>
@@ -115,7 +125,7 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-2 xl:flex">
           <button
             type="button"
             aria-label="Search"
@@ -126,34 +136,35 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
               <path d="m20 20-4.2-4.2" />
             </svg>
           </button>
-
+          
           <button
             type="button"
             onClick={toggleTheme}
-            className={`rounded-full border px-3 py-2 text-sm font-medium transition ${hover} ${isDark ? "border-[#1D3E3E]" : "border-[#D7ECE4]"}`}
+            className={`rounded-full border border-border p-2.5 px-3 py-2 text-sm font-medium transition ${hover}`}
+            aria-label="Toggle theme"
           >
             {isDark ? "☀️" : "🌙"}
           </button>
 
           <Link
             href="/login"
-            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${hover} ${isDark ? "border-[#1D3E3E]" : "border-[#D7ECE4]"}`}
+            className={`rounded-full border border-border px-4 py-2 text-sm font-semibold transition ${hover}`}
           >
             Login
           </Link>
           <Link
             href="/signup"
-            className={`rounded-full px-4 py-2 text-sm font-semibold text-[#081717] transition ${accent}`}
+            className="rounded-full px-4 py-2 text-sm font-semibold transition bg-primary text-primary-foreground hover:opacity-90"
           >
             Register
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-2 xl:hidden">
           <button
             type="button"
             onClick={toggleTheme}
-            className={`rounded-full border p-2.5 transition ${hover} ${isDark ? "border-[#1D3E3E]" : "border-[#D7ECE4]"}`}
+            className={`rounded-full border border-border p-2.5 transition ${hover}`}
             aria-label="Toggle theme"
           >
             {isDark ? "☀️" : "🌙"}
@@ -161,7 +172,7 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className={`rounded-full border p-2.5 transition ${hover} ${isDark ? "border-[#1D3E3E]" : "border-[#D7ECE4]"}`}
+            className={`rounded-full border border-border p-2.5 transition ${hover}`}
             aria-label="Open navigation menu"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -176,14 +187,14 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
       <div
         className={`fixed inset-0 z-[60] transition ${mobileOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
       >
-        <div className="absolute inset-0 bg-[#081717]/80 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
         <aside
-          className={`absolute right-0 top-0 flex h-full w-4/5 max-w-sm flex-col border-l p-5 transition-transform duration-300 ${
+          className={`absolute right-0 top-0 flex h-full w-4/5 max-w-sm flex-col border-l border-border bg-card p-5 transition-transform duration-300 ${
             mobileOpen ? "translate-x-0" : "translate-x-full"
-          } ${isDark ? "border-[#1D3E3E] bg-[#0A2324] text-[#F3F7F6]" : "border-[#D7ECE4] bg-white text-[#081717]"}`}
+          }`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-lg font-semibold">Navigation</p>
+            <p className="text-lg font-semibold text-foreground">Navigation</p>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
@@ -228,13 +239,13 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
             ))}
           </ul>
 
-          <div className={`mt-auto rounded-2xl border p-4 ${isDark ? "border-[#1D3E3E] bg-[#0D2A2B]" : "border-[#D7ECE4] bg-[#F4FFF8]"}`}>
-            <p className="text-sm font-semibold">Join the learning journey</p>
+          <div className="mt-auto rounded-2xl border border-border bg-secondary p-4">
+            <p className="text-sm font-semibold text-foreground">Join the learning journey</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/login" className={`rounded-full px-3 py-2 text-sm font-semibold ${isDark ? "bg-[#081717] text-[#F3F7F6]" : "bg-white text-[#081717]"}`}>
+              <Link href="/login" className="rounded-full px-3 py-2 text-sm font-semibold bg-background text-foreground hover:bg-muted">
                 Login
               </Link>
-              <Link href="/signup" className={`rounded-full px-3 py-2 text-sm font-semibold ${accent} text-[#081717]`}>
+              <Link href="/signup" className="rounded-full px-3 py-2 text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90">
                 Register
               </Link>
             </div>

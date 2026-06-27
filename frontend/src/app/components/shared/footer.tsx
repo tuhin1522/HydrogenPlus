@@ -1,9 +1,5 @@
 import Link from "next/link";
 
-type FooterProps = {
-  theme: "dark" | "light";
-};
-
 const quickLinks = [
   { label: "About us", href: "#about" },
   { label: "Programs", href: "#programs" },
@@ -18,33 +14,26 @@ const supportLinks = [
   { label: "Terms", href: "#terms" },
 ];
 
-export default function Footer({ theme }: FooterProps) {
-  const isDark = theme === "dark";
-  const shell = isDark
-    ? "border-[#1D3E3E] bg-[#081717] text-[#F3F7F6]"
-    : "border-[#D7ECE4] bg-[#F8FFF9] text-[#081717]";
-  const muted = isDark ? "text-[#A9B7B4]" : "text-[#4B5A58]";
-  const accent = isDark ? "text-[#86F05C]" : "text-[#0E8B6E]";
-
+export default function Footer() {
   return (
-    <footer className={`border-t ${shell}`}>
+    <footer className="border-t border-border bg-card text-foreground">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.6fr_0.6fr] lg:px-8">
         <div>
-          <p className={`text-sm font-semibold uppercase tracking-[0.24em] ${accent}`}>
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
             EduBranch Pro
           </p>
-          <h3 className="mt-3 text-2xl font-semibold">A modern coaching center for ambitious learners.</h3>
-          <p className="mt-3 max-w-md text-sm leading-7 text-[#A9B7B4]">
+          <h3 className="mt-3 text-2xl font-semibold text-foreground">A modern coaching center for ambitious learners.</h3>
+          <p className="mt-3 max-w-md text-sm leading-7 text-muted-foreground">
             From live classes to structured practice and progress tracking, we make learning simpler, smarter, and more motivating.
           </p>
         </div>
 
         <div>
-          <h4 className={`text-sm font-semibold uppercase tracking-[0.2em] ${accent}`}>Quick Links</h4>
+          <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Quick Links</h4>
           <ul className="mt-4 space-y-3">
             {quickLinks.map((item) => (
               <li key={item.label}>
-                <Link href={item.href} className="text-sm text-[#A9B7B4] transition hover:text-[#F3F7F6]">
+                <Link href={item.href} className="text-sm text-muted-foreground transition hover:text-foreground">
                   {item.label}
                 </Link>
               </li>
@@ -53,11 +42,11 @@ export default function Footer({ theme }: FooterProps) {
         </div>
 
         <div>
-          <h4 className={`text-sm font-semibold uppercase tracking-[0.2em] ${accent}`}>Support</h4>
+          <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Support</h4>
           <ul className="mt-4 space-y-3">
             {supportLinks.map((item) => (
               <li key={item.label}>
-                <Link href={item.href} className="text-sm text-[#A9B7B4] transition hover:text-[#F3F7F6]">
+                <Link href={item.href} className="text-sm text-muted-foreground transition hover:text-foreground">
                   {item.label}
                 </Link>
               </li>
@@ -66,7 +55,7 @@ export default function Footer({ theme }: FooterProps) {
         </div>
       </div>
 
-      <div className={`border-t px-4 py-4 text-center text-sm ${muted} sm:px-6 lg:px-8`}>
+      <div className="border-t border-border px-4 py-4 text-center text-sm text-muted-foreground sm:px-6 lg:px-8">
         © 2026 EduBranch Pro. All rights reserved.
       </div>
     </footer>
