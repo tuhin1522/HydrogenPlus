@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Footer from "./components/footer";
-import Navbar from "./components/navbar";
+import Footer from "./components/shared/footer";
+import Navbar from "./components/shared/navbar";
 
 const highlights = [
   "Live classes for school and college prep",
@@ -40,10 +40,10 @@ export default function Home() {
               Support every learner with live sessions, exam readiness, and performance insights in a single elegant platform.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <a href="/auth/signup" className="rounded-full bg-[#86F05C] px-5 py-3 text-sm font-semibold text-[#081717] transition hover:bg-[#B7FF63]">
+              <a href="/signup" className="rounded-full bg-[#86F05C] px-5 py-3 text-sm font-semibold text-[#081717] transition hover:bg-[#B7FF63]">
                 Create Account
               </a>
-              <a href="/auth/login" className={`rounded-full border px-5 py-3 text-sm font-semibold transition ${isDark ? "border-[#1D3E3E] text-[#F3F7F6] hover:bg-[#0D2A2B]" : "border-[#D7ECE4] text-[#081717] hover:bg-[#E8FCEF]"}`}>
+              <a href="/login" className={`rounded-full border px-5 py-3 text-sm font-semibold transition ${isDark ? "border-[#1D3E3E] text-[#F3F7F6] hover:bg-[#0D2A2B]" : "border-[#D7ECE4] text-[#081717] hover:bg-[#E8FCEF]"}`}>
                 Sign In
               </a>
             </div>

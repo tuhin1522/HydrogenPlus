@@ -136,13 +136,13 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
           </button>
 
           <Link
-            href="/auth/login"
+            href="/login"
             className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${hover} ${isDark ? "border-[#1D3E3E]" : "border-[#D7ECE4]"}`}
           >
             Login
           </Link>
           <Link
-            href="/auth/signup"
+            href="/signup"
             className={`rounded-full px-4 py-2 text-sm font-semibold text-[#081717] transition ${accent}`}
           >
             Register
@@ -231,10 +231,10 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
           <div className={`mt-auto rounded-2xl border p-4 ${isDark ? "border-[#1D3E3E] bg-[#0D2A2B]" : "border-[#D7ECE4] bg-[#F4FFF8]"}`}>
             <p className="text-sm font-semibold">Join the learning journey</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/auth/login" className={`rounded-full px-3 py-2 text-sm font-semibold ${isDark ? "bg-[#081717] text-[#F3F7F6]" : "bg-white text-[#081717]"}`}>
+              <Link href="/login" className={`rounded-full px-3 py-2 text-sm font-semibold ${isDark ? "bg-[#081717] text-[#F3F7F6]" : "bg-white text-[#081717]"}`}>
                 Login
               </Link>
-              <Link href="/auth/signup" className={`rounded-full px-3 py-2 text-sm font-semibold ${accent} text-[#081717]`}>
+              <Link href="/signup" className={`rounded-full px-3 py-2 text-sm font-semibold ${accent} text-[#081717]`}>
                 Register
               </Link>
             </div>

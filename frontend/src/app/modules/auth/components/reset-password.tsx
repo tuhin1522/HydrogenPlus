@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import AuthShell from "./auth-shell";
 
+
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,7 +42,7 @@ export default function ResetPasswordForm() {
       subtitle="Create a new secure password for your account"
       footerText="Need help?"
       footerLinkText="Contact support"
-      footerHref="/auth/login"
+      footerHref="/login"
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
