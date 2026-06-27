@@ -61,6 +61,7 @@ export default function Signup() {
     confirmPassword: "",
     agreeTerms: false,
   });
+  const [validationErrors, setValidationErrors] = useState<any[]>([]);
 
   const passwordStrength = useMemo(
     () => getPasswordStrength(formData.password),
@@ -75,7 +76,7 @@ export default function Signup() {
   const accent = isDark ? "from-[#B7FF63] via-[#86F05C] to-[#0E8B6E]" : "from-[#86F05C] via-[#2BCA7A] to-[#0E8B6E]";
 
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = event.target;
     const checked = type === "checkbox" ? (event.target as HTMLInputElement).checked : undefined;
@@ -89,19 +90,58 @@ export default function Signup() {
   const handleNext = () => {
     if (currentStep < 4) {
       setCurrentStep((prev) => prev + 1);
+      setValidationErrors([]); // Clear errors on step change
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
+      setValidationErrors([]); // Clear errors on step change
     }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setValidationErrors([]);
+
     if (formData.password === formData.confirmPassword && formData.agreeTerms) {
-      setCurrentStep(4);
+      try {
+        const { authService } = await import("./../services/auth.service");
+        const response = await authService.signup({
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+        });
+
+        if (response.success && response.data?.token) {
+          // Save the token and user
+          localStorage.setItem("token", response.data.token);
+          if (response.data.user) {
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+            // Dispatch a storage event so Navbar picks it up immediately
+            window.dispatchEvent(new Event("storage"));
+          }
+          
+          // Redirect to dashboard (default is student)
+          const userRole = response.data.user?.role || "STUDENT";
+          setTimeout(() => {
+            if (userRole === "TEACHER") window.location.href = "/teacher";
+            else if (userRole === "SUPER_ADMIN") window.location.href = "/super-admin";
+            else if (userRole === "BRANCH_ADMIN") window.location.href = "/branch-admin";
+            else window.location.href = "/student";
+          }, 500);
+        } else {
+          alert(response.message || "Signup failed. Please try again.");
+        }
+      } catch (error: any) {
+        if (error.response?.data?.errors) {
+          setValidationErrors(error.response.data.errors);
+        } else {
+          alert(error.response?.data?.message || "An error occurred during signup.");
+        }
+      }
     }
   };
 
@@ -215,6 +255,17 @@ export default function Signup() {
             </div>
 
             <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+              {validationErrors.length > 0 && (
+                <div className={`rounded-2xl border px-4 py-3 text-sm border-[#EF4343]/50 bg-[#EF4343]/10 text-[#EF4343]`}>
+                  <p className="font-semibold mb-1">Please fix the following errors:</p>
+                  <ul className="list-disc pl-5">
+                    {validationErrors.map((err, i) => (
+                      <li key={i}>{err.message}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {currentStep === 1 && (
                 <>
                   <div>
@@ -232,23 +283,23 @@ export default function Signup() {
                       required
                     />
                   </div>
+                  <div>
+                    <label htmlFor="email" className="mb-2 block text-sm font-medium">
+                      Email
+                    </label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="alicia@school.edu"
+                      className={`w-full rounded-2xl border px-4 py-3 outline-none transition focus:ring-2 ${border} ${focus} ${isDark ? "bg-[#081717]" : "bg-white"}`}
+                      required
+                    />
+                  </div>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="email" className="mb-2 block text-sm font-medium">
-                        Email
-                      </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="alicia@northview.edu"
-                        className={`w-full rounded-2xl border px-4 py-3 outline-none transition focus:ring-2 ${border} ${focus} ${isDark ? "bg-[#081717]" : "bg-white"}`}
-                        required
-                      />
-                    </div>
-                    <div>
+                    <div className="col-span-2">
                       <label htmlFor="phone" className="mb-2 block text-sm font-medium">
                         Phone Number
                       </label>
@@ -258,7 +309,7 @@ export default function Signup() {
                         type="tel"
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder="+1 555 0123"
+                        placeholder="01712345678"
                         className={`w-full rounded-2xl border px-4 py-3 outline-none transition focus:ring-2 ${border} ${focus} ${isDark ? "bg-[#081717]" : "bg-white"}`}
                         required
                       />
@@ -363,7 +414,7 @@ export default function Signup() {
                   </p>
                   <div className="mt-6 flex flex-wrap justify-center gap-3">
                     <Link
-                      href="/"
+                      href="/student"
                       className={`rounded-full px-4 py-2.5 text-sm font-semibold text-[#081717] transition ${isDark ? "bg-[#86F05C] hover:bg-[#B7FF63]" : "bg-[#2BCA7A] hover:bg-[#86F05C]"}`}
                     >
                       Go to dashboard

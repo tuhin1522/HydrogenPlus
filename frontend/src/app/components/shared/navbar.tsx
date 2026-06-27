@@ -43,6 +43,34 @@ const desktopMenu: NavItem[] = [
 export default function Navbar({ theme, toggleTheme }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const checkUser = () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        try {
+          setUser(JSON.parse(userData));
+        } catch (e) {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+    
+    checkUser();
+    window.addEventListener("storage", checkUser);
+    return () => window.removeEventListener("storage", checkUser);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    window.dispatchEvent(new Event("storage"));
+    window.location.href = "/login";
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -135,18 +163,34 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
             {isDark ? "☀️" : "🌙"}
           </button>
 
-          <Link
-            href="/login"
-            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${hover} ${isDark ? "border-[#1D3E3E]" : "border-[#D7ECE4]"}`}
-          >
-            Login
-          </Link>
-          <Link
-            href="/signup"
-            className={`rounded-full px-4 py-2 text-sm font-semibold text-[#081717] transition ${accent}`}
-          >
-            Register
-          </Link>
+          {user ? (
+            <>
+              <Link href="/dashboard" className={`rounded-full px-4 py-2 text-sm font-semibold transition ${hover} ${isDark ? "text-white" : "text-black"}`}>
+                {user.name}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className={`rounded-full px-4 py-2 text-sm font-semibold text-[#081717] transition ${accent}`}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${hover} ${isDark ? "border-[#1D3E3E]" : "border-[#D7ECE4]"}`}
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className={`rounded-full px-4 py-2 text-sm font-semibold text-[#081717] transition ${accent}`}
+              >
+                Register
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -231,12 +275,25 @@ export default function Navbar({ theme, toggleTheme }: NavbarProps) {
           <div className={`mt-auto rounded-2xl border p-4 ${isDark ? "border-[#1D3E3E] bg-[#0D2A2B]" : "border-[#D7ECE4] bg-[#F4FFF8]"}`}>
             <p className="text-sm font-semibold">Join the learning journey</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/login" className={`rounded-full px-3 py-2 text-sm font-semibold ${isDark ? "bg-[#081717] text-[#F3F7F6]" : "bg-white text-[#081717]"}`}>
-                Login
-              </Link>
-              <Link href="/signup" className={`rounded-full px-3 py-2 text-sm font-semibold ${accent} text-[#081717]`}>
-                Register
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/dashboard" className={`rounded-full px-3 py-2 text-sm font-semibold ${isDark ? "bg-[#081717] text-[#F3F7F6]" : "bg-white text-[#081717]"}`}>
+                    {user.name}
+                  </Link>
+                  <button onClick={handleLogout} className={`rounded-full px-3 py-2 text-sm font-semibold ${accent} text-[#081717]`}>
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className={`rounded-full px-3 py-2 text-sm font-semibold ${isDark ? "bg-[#081717] text-[#F3F7F6]" : "bg-white text-[#081717]"}`}>
+                    Login
+                  </Link>
+                  <Link href="/signup" className={`rounded-full px-3 py-2 text-sm font-semibold ${accent} text-[#081717]`}>
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </aside>
