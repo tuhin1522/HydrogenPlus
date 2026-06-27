@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import AuthShell from "./auth-shell";
+import { useRouter } from "next/navigation";
+import { authService } from "../services/auth.service";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -10,6 +12,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   const passwordStrength = useMemo(() => {
     if (!password) return { label: "Enter password", color: "bg-[#1D3E3E]" };
@@ -19,21 +22,62 @@ export default function LoginForm() {
     return { label: "Weak", color: "bg-[#EF4343]" };
   }, [password]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setStatus("idle");
 
-    setTimeout(() => {
-      if (!email.includes("@") || password.length < 6) {
-        setStatus("error");
-        setMessage("Please enter a valid email and a password with at least 6 characters.");
-      } else {
-        setStatus("success");
-        setMessage("Signed in successfully. Welcome back to EduBranch Pro.");
-      }
+    if (!email.includes("@") || password.length < 6) {
+      setStatus("error");
+      setMessage("Please enter a valid email and a password with at least 6 characters.");
       setLoading(false);
-    }, 900);
+      return;
+    }
+
+    try {
+      const data = await authService.login(email, password);
+
+      if (data?.success) {
+        setStatus("success");
+        setMessage("Signed in successfully. Welcome back.");
+        
+        // Save the token and user
+        const token = data.data?.token;
+        const user = data.data?.user;
+        
+        if (token) {
+          localStorage.setItem("token", token);
+          if (user) {
+            localStorage.setItem("user", JSON.stringify(user));
+            // Dispatch a storage event so Navbar can pick it up immediately
+            window.dispatchEvent(new Event("storage"));
+          }
+        }
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          let redirectPath = "/";
+          if (user?.role === "STUDENT") {
+            redirectPath = "/student";
+          } else if (user?.role === "TEACHER") {
+            redirectPath = "/teacher";
+          } else if (user?.role === "SUPER_ADMIN") {
+            redirectPath = "/super-admin";
+          } else if (user?.role === "BRANCH_ADMIN") {
+            redirectPath = "/branch-admin";
+          }
+          router.push(redirectPath);
+        }, 1000);
+      } else {
+        setStatus("error");
+        setMessage(data?.message || "Login failed. Please try again.");
+      }
+    } catch (error: any) {
+      setStatus("error");
+      setMessage(error.response?.data?.message || "An error occurred during login. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

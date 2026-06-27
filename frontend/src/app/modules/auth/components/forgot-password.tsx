@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AuthShell from "./auth-shell";
+import { authService } from "../services/auth.service";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -9,21 +10,34 @@ export default function ForgotPasswordForm() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setStatus("idle");
 
-    setTimeout(() => {
-      if (!email.includes("@")) {
-        setStatus("error");
-        setMessage("Please enter a valid email address to receive the reset link.");
-      } else {
-        setStatus("success");
-        setMessage(`A reset link has been sent to ${email}.`);
-      }
+    if (!email.includes("@")) {
+      setStatus("error");
+      setMessage("Please enter a valid email address to receive the reset link.");
       setLoading(false);
-    }, 800);
+      return;
+    }
+
+    try {
+      const data = await authService.forgotPassword(email);
+
+      if (data?.success) {
+        setStatus("success");
+        setMessage(data?.message || `A reset link has been sent to ${email}.`);
+      } else {
+        setStatus("error");
+        setMessage(data?.message || "Failed to send reset link.");
+      }
+    } catch (error: any) {
+      setStatus("error");
+      setMessage(error.response?.data?.message || "An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
