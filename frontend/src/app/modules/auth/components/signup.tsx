@@ -198,7 +198,7 @@ export default function Signup() {
 
             <p className={`mt-4 text-sm ${isDark ? "text-[#A9B7B4]" : "text-[#4B5A58]"}`}>
               Already have an account?{' '}
-              <Link href="/auth/login" className="font-semibold text-[#86F05C] transition hover:text-[#B7FF63]">
+              <Link href="/login" className="font-semibold text-[#86F05C] transition hover:text-[#B7FF63]">
                 Sign in
               </Link>
             </p>

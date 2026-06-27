@@ -32,7 +32,7 @@ export default function ForgotPasswordForm() {
       subtitle="We’ll send a secure reset link to your email"
       footerText="Remember your password?"
       footerLinkText="Back to login"
-      footerHref="/auth/login"
+      footerHref="/login"
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>

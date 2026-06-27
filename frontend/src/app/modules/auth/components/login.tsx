@@ -42,7 +42,7 @@ export default function LoginForm() {
       subtitle="Log in to your coaching and branch management workspace"
       footerText="Don’t have an account?"
       footerLinkText="Create one"
-      footerHref="/auth/signup"
+      footerHref="/signup"
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
@@ -94,7 +94,7 @@ export default function LoginForm() {
             />
             Remember me
           </label>
-          <a href="/auth/forgot-password" className="font-medium text-[#86F05C] transition hover:text-[#B7FF63]">
+          <a href="/forgot-password" className="font-medium text-[#86F05C] transition hover:text-[#B7FF63]">
             Forgot password?
           </a>
         </div>
