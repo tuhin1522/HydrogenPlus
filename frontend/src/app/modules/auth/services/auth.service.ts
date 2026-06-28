@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-const BASE_URL = `${API_URL}/api/v1/auth`;
+const BASE_URL = `${API_URL}/auth`;
 
 export const authService = {
   login: async (email: string, password: string) => {
