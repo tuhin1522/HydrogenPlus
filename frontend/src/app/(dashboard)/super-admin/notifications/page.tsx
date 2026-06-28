@@ -25,10 +25,15 @@ export default function NotificationsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
       const res = await getAllNotifications({ search, limit: 100 });
       setNotifications(res?.data || []);
-    } catch {
-      showToast("Failed to load notifications", "error");
+    } catch (error: any) {
+      if (error?.response?.status !== 401 && error?.response?.status !== 403) {
+        showToast("Failed to load notifications", "error");
+      }
     } finally {
       setLoading(false);
     }

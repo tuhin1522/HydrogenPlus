@@ -4,6 +4,14 @@ import { useState } from "react";
 import AuthShell from "@/app/modules/auth/components/auth-shell";
 import { authService } from "@/app/modules/auth/services/auth.service";
 
+type ResendVerificationError = {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
 export default function ResendVerificationPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
@@ -32,9 +40,10 @@ export default function ResendVerificationPage() {
         setStatus("error");
         setMessage(data?.message || "Failed to send verification link.");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as ResendVerificationError;
       setStatus("error");
-      setMessage(error.response?.data?.message || "An error occurred. Please try again.");
+      setMessage(err.response?.data?.message || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }

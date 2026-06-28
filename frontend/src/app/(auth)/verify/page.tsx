@@ -5,29 +5,54 @@ import { useSearchParams, useRouter } from "next/navigation";
 import AuthShell from "@/app/modules/auth/components/auth-shell";
 import { authService } from "@/app/modules/auth/services/auth.service";
 
+type VerificationStatus = "loading" | "success" | "error";
+
+interface VerificationResponse {
+  success?: boolean;
+  message?: string;
+  data?: {
+    token?: string;
+    user?: {
+      role?: string;
+    };
+  };
+}
+
+interface VerificationErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  const [message, setMessage] = useState("Verifying your email address...");
+  const [status, setStatus] = useState<VerificationStatus>(() => (token ? "loading" : "error"));
+  const [message, setMessage] = useState(() =>
+    token ? "Verifying your email address..." : "Verification token is missing."
+  );
 
   useEffect(() => {
     if (!token) {
-      setStatus("error");
-      setMessage("Verification token is missing.");
       return;
     }
 
+    let isActive = true;
+
     const verify = async () => {
       try {
-        const data = await authService.verifyEmail(token);
-        
+        const data = (await authService.verifyEmail(token)) as VerificationResponse;
+
+        if (!isActive) return;
+
         if (data?.success) {
           setStatus("success");
           setMessage(data?.message || "Email verified successfully!");
-          
+
           if (data.data?.token) {
             localStorage.setItem("token", data.data.token);
             if (data.data.user) {
@@ -37,17 +62,19 @@ export default function VerifyEmailPage() {
           }
 
           setTimeout(() => {
+            if (!isActive) return;
+
             const userData = localStorage.getItem("user");
             if (userData) {
               try {
-                const user = JSON.parse(userData);
+                const user = JSON.parse(userData) as { role?: string };
                 const role = user.role || "STUDENT";
                 if (role === "TEACHER") router.push("/teacher");
                 else if (role === "SUPER_ADMIN") router.push("/super-admin");
                 else if (role === "BRANCH_ADMIN") router.push("/branch-admin");
                 else router.push("/student");
                 return;
-              } catch (e) {
+              } catch {
                 // Ignore
               }
             }
@@ -57,13 +84,20 @@ export default function VerifyEmailPage() {
           setStatus("error");
           setMessage(data?.message || "Failed to verify email.");
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        if (!isActive) return;
+
+        const err = error as VerificationErrorResponse;
         setStatus("error");
-        setMessage(error.response?.data?.message || "An error occurred during verification.");
+        setMessage(err.response?.data?.message || "An error occurred during verification.");
       }
     };
 
-    verify();
+    void verify();
+
+    return () => {
+      isActive = false;
+    };
   }, [token, router]);
 
   return (

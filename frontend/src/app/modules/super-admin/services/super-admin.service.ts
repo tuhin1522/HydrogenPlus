@@ -1,6 +1,9 @@
 import axiosInstance from "@/app/services/axiosInstance";
 
 // ========== TYPES ==========
+type QueryParams = Record<string, string | number | boolean | null | undefined | Array<string | number | boolean>>;
+type ApiPayload = Record<string, unknown>;
+
 export interface CreateBranchPayload {
   name: string;
   managerName: string;
@@ -31,7 +34,7 @@ export interface CreateCoursePayload {
 export const createBranch = (data: CreateBranchPayload) =>
   axiosInstance.post("/branches/create-branch", data).then((r) => r.data);
 
-export const getAllBranches = (params?: Record<string, any>) =>
+export const getAllBranches = (params?: QueryParams) =>
   axiosInstance.get("/branches/all-branches", { params }).then((r) => r.data);
 
 export const getBranchById = (id: string) =>
@@ -47,46 +50,46 @@ export const deleteBranch = (id: string) =>
 export const createBranchAdmin = (data: CreateBranchAdminPayload) =>
   axiosInstance.post("/branch-admins/create-branch-admin", data).then((r) => r.data);
 
-export const getAllBranchAdmins = (params?: Record<string, any>) =>
+export const getAllBranchAdmins = (params?: QueryParams) =>
   axiosInstance.get("/branch-admins/all-branch-admins", { params }).then((r) => r.data);
 
 export const getBranchAdminById = (id: string) =>
   axiosInstance.get(`/branch-admins/branch-admin/${id}`).then((r) => r.data);
 
-export const updateBranchAdmin = (id: string, data: any) =>
+export const updateBranchAdmin = (id: string, data: ApiPayload) =>
   axiosInstance.patch(`/branch-admins/update/${id}`, data).then((r) => r.data);
 
 export const deleteBranchAdmin = (id: string) =>
   axiosInstance.delete(`/branch-admins/delete/${id}`).then((r) => r.data);
 
 // ========== STUDENTS ==========
-export const getAllStudents = (params?: Record<string, any>) =>
+export const getAllStudents = (params?: QueryParams) =>
   axiosInstance.get("/students/all-students", { params }).then((r) => r.data);
 
 export const getStudentById = (id: string) =>
   axiosInstance.get(`/students/student/${id}`).then((r) => r.data);
 
-export const updateStudent = (id: string, data: any) =>
+export const updateStudent = (id: string, data: ApiPayload) =>
   axiosInstance.patch(`/students/update/${id}`, data).then((r) => r.data);
 
 export const deleteStudent = (id: string) =>
   axiosInstance.delete(`/students/delete/${id}`).then((r) => r.data);
 
 // ========== TEACHERS ==========
-export const getAllTeachers = (params?: Record<string, any>) =>
+export const getAllTeachers = (params?: QueryParams) =>
   axiosInstance.get("/teachers/all-teachers", { params }).then((r) => r.data);
 
 export const getTeacherById = (id: string) =>
   axiosInstance.get(`/teachers/teacher/${id}`).then((r) => r.data);
 
-export const updateTeacher = (id: string, data: any) =>
+export const updateTeacher = (id: string, data: ApiPayload) =>
   axiosInstance.patch(`/teachers/update/${id}`, data).then((r) => r.data);
 
 export const deleteTeacher = (id: string) =>
   axiosInstance.delete(`/teachers/delete/${id}`).then((r) => r.data);
 
 // ========== CLASS LEVELS ==========
-export const getAllClassLevels = (params?: Record<string, any>) =>
+export const getAllClassLevels = (params?: QueryParams) =>
   axiosInstance.get("/class-levels/all-class-levels", { params }).then((r) => r.data);
 
 export const createClassLevel = (data: { name: string }) =>
@@ -99,36 +102,36 @@ export const deleteClassLevel = (id: string) =>
   axiosInstance.delete(`/class-levels/delete/${id}`).then((r) => r.data);
 
 // ========== BATCHES ==========
-export const getAllBatches = (params?: Record<string, any>) =>
+export const getAllBatches = (params?: QueryParams) =>
   axiosInstance.get("/batches", { params }).then((r) => r.data);
 
 export const getBatchById = (id: string) =>
   axiosInstance.get(`/batches/batch/${id}`).then((r) => r.data);
 
-export const createBatch = (data: any) =>
+export const createBatch = (data: ApiPayload) =>
   axiosInstance.post("/batches/create-batch", data).then((r) => r.data);
 
-export const updateBatch = (id: string, data: any) =>
+export const updateBatch = (id: string, data: ApiPayload) =>
   axiosInstance.patch(`/batches/update/${id}`, data).then((r) => r.data);
 
 export const deleteBatch = (id: string) =>
   axiosInstance.delete(`/batches/delete/${id}`).then((r) => r.data);
 
 // ========== SUBJECTS ==========
-export const getAllSubjects = (params?: Record<string, any>) =>
+export const getAllSubjects = (params?: QueryParams) =>
   axiosInstance.get("/subjects", { params }).then((r) => r.data);
 
-export const createSubject = (data: any) =>
+export const createSubject = (data: ApiPayload) =>
   axiosInstance.post("/subjects/create-subject", data).then((r) => r.data);
 
-export const updateSubject = (id: string, data: any) =>
+export const updateSubject = (id: string, data: ApiPayload) =>
   axiosInstance.patch(`/subjects/update/${id}`, data).then((r) => r.data);
 
 export const deleteSubject = (id: string) =>
   axiosInstance.delete(`/subjects/delete/${id}`).then((r) => r.data);
 
 // ========== COURSES ==========
-export const getAllCourses = (params?: Record<string, any>) =>
+export const getAllCourses = (params?: QueryParams) =>
   axiosInstance.get("/courses", { params }).then((r) => r.data);
 
 export const getCourseById = (id: string) =>
@@ -142,6 +145,16 @@ export const updateCourse = (id: string, data: Partial<CreateCoursePayload>) =>
 
 export const deleteCourse = (id: string) =>
   axiosInstance.delete(`/courses/delete/${id}`).then((r) => r.data);
+
+// ========== EXAMS ==========
+export const getAllExams = (params?: QueryParams) =>
+  axiosInstance.get("/exams", { params }).then((r) => r.data);
+
+export const createExam = (data: ApiPayload) =>
+  axiosInstance.post("/exams/create-exam", data).then((r) => r.data);
+
+export const deleteExam = (id: string) =>
+  axiosInstance.delete(`/exams/delete/${id}`).then((r) => r.data);
 
 // ========== ANALYTICS ==========
 export const getOverviewStats = () =>
@@ -157,10 +170,10 @@ export const getSystemHealth = () =>
   axiosInstance.get("/analytics/system-health").then((r) => r.data);
 
 // ========== SYSTEM ==========
-export const getAllUsers = (params?: Record<string, any>) =>
+export const getAllUsers = (params?: QueryParams) =>
   axiosInstance.get("/system/users", { params }).then((r) => r.data);
 
-export const getAllNotifications = (params?: Record<string, any>) =>
+export const getAllNotifications = (params?: QueryParams) =>
   axiosInstance.get("/system/notifications", { params }).then((r) => r.data);
 
 export const createNotification = (data: { title: string; message: string; type?: string; userId?: string }) =>
@@ -178,11 +191,11 @@ export const getAllSettings = () =>
 export const upsertSetting = (data: { key: string; value: string; description?: string }) =>
   axiosInstance.put("/system/settings", data).then((r) => r.data);
 
-export const getAuditLogs = (params?: Record<string, any>) =>
+export const getAuditLogs = (params?: QueryParams) =>
   axiosInstance.get("/system/audit-logs", { params }).then((r) => r.data);
 
 // ========== BATCH SUBJECTS ==========
-export const getAllBatchSubjects = (params?: Record<string, any>) =>
+export const getAllBatchSubjects = (params?: QueryParams) =>
   axiosInstance.get("/batch-subjects/batch-subjects", { params }).then((r) => r.data);
 
 export const createBatchSubject = (data: { batchId: string; subjectId: string; teacherId: string }) =>
@@ -195,13 +208,13 @@ export const deleteBatchSubject = (id: string) =>
   axiosInstance.delete(`/batch-subjects/delete/${id}`).then((r) => r.data);
 
 // ========== ROUTINES ==========
-export const getAllRoutines = (params?: Record<string, any>) =>
+export const getAllRoutines = (params?: QueryParams) =>
   axiosInstance.get("/routines", { params }).then((r) => r.data);
 
-export const createRoutine = (data: any) =>
+export const createRoutine = (data: ApiPayload) =>
   axiosInstance.post("/routines/create-routine", data).then((r) => r.data);
 
-export const updateRoutine = (id: string, data: any) =>
+export const updateRoutine = (id: string, data: ApiPayload) =>
   axiosInstance.patch(`/routines/update/${id}`, data).then((r) => r.data);
 
 export const deleteRoutine = (id: string) =>
@@ -219,7 +232,7 @@ export const createUser = (data: {
   role: "BRANCH_ADMIN" | "TEACHER" | "STUDENT";
 }) => axiosInstance.post("/system/users", data).then((r) => r.data);
 
-export const updateUser = (id: string, data: any) =>
+export const updateUser = (id: string, data: ApiPayload) =>
   axiosInstance.patch(`/system/users/${id}`, data).then((r) => r.data);
 
 export const updateUserStatus = (id: string, isActive: boolean) =>

@@ -73,7 +73,7 @@ export default function BranchAdminsPage() {
         joiningDate: form.joiningDate ? new Date(form.joiningDate as string).toISOString() : undefined,
       };
       if (modal === "edit" && editingId) {
-        await updateBranchAdmin(editingId, { designation: payload.designation, joiningDate: payload.joiningDate });
+        await updateBranchAdmin(editingId, payload);
         showToast("Branch admin updated!");
       } else {
         await createBranchAdmin(payload);
@@ -166,24 +166,20 @@ export default function BranchAdminsPage() {
               <button onClick={() => setModal(null)} className="text-[#71717A] hover:text-[#F2F2F2] transition">✕</button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {modal === "create" && (
-                <div>
-                  <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">Teacher (User) *</label>
-                  <select required value={form.userId} onChange={(e) => setForm({ ...form, userId: e.target.value })} className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E] transition">
-                    <option value="">-- Select Teacher --</option>
-                    {teachers.map((t) => (<option key={t.id} value={t.userId}>{t.user?.name} ({t.user?.email})</option>))}
-                  </select>
-                </div>
-              )}
-              {modal === "create" && (
-                <div>
-                  <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">Branch *</label>
-                  <select required value={form.branchId} onChange={(e) => setForm({ ...form, branchId: e.target.value })} className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E] transition">
-                    <option value="">-- Select Branch --</option>
-                    {branches.map((b) => (<option key={b.id} value={b.id}>{b.name} – {b.address}</option>))}
-                  </select>
-                </div>
-              )}
+              <div>
+                <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">Teacher (User) *</label>
+                <select required value={form.userId} onChange={(e) => setForm({ ...form, userId: e.target.value })} className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E] transition">
+                  <option value="">-- Select Teacher --</option>
+                  {teachers.map((t) => (<option key={t.id} value={t.userId}>{t.user?.name} ({t.user?.email})</option>))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">Branch *</label>
+                <select required value={form.branchId} onChange={(e) => setForm({ ...form, branchId: e.target.value })} className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E] transition">
+                  <option value="">-- Select Branch --</option>
+                  {branches.map((b) => (<option key={b.id} value={b.id}>{b.name} – {b.address}</option>))}
+                </select>
+              </div>
               <div>
                 <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">Designation</label>
                 <input type="text" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} placeholder="e.g. Principal" className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] placeholder-[#71717A] outline-none focus:border-[#22C55E] transition" />

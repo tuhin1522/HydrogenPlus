@@ -137,3 +137,12 @@ export const resetPassword = async (
   });
   return response.data;
 };
+
+export const authService = {
+  login,
+  signup,
+  forgotPassword,
+  verifyEmail,
+  resendVerification,
+  resetPassword,
+};

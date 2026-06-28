@@ -11,13 +11,22 @@ const MENU_ITEMS = [
   { id: "students", label: "Students", icon: "🎓", path: "/super-admin/students" },
   { id: "teachers", label: "Teachers", icon: "👩‍🏫", path: "/super-admin/teachers" },
   { id: "academic", label: "Academic", icon: "📚", path: "/super-admin/academic" },
+  { id: "routine", label: "Class Routine", icon: "🗓️", path: "/super-admin/routine" },
+  { id: "exams", label: "Exams", icon: "📝", path: "/super-admin/exams" },
   { id: "courses", label: "Courses", icon: "🎯", path: "/super-admin/courses" },
+  { id: "payments", label: "Payments", icon: "💳", path: "/super-admin/payments" },
   { id: "analytics", label: "Analytics", icon: "📈", path: "/super-admin/analytics" },
   { id: "notifications", label: "Notifications", icon: "🔔", path: "/super-admin/notifications" },
   { id: "users", label: "All Users", icon: "👥", path: "/super-admin/users" },
   { id: "audit-logs", label: "Audit Logs", icon: "📋", path: "/super-admin/audit-logs" },
   { id: "settings", label: "Settings", icon: "⚙️", path: "/super-admin/settings" },
 ];
+
+interface SuperAdminUser {
+  name?: string;
+  email?: string;
+  role?: string;
+}
 
 export default function SuperAdminLayout({
   children,
@@ -26,28 +35,50 @@ export default function SuperAdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const [user] = useState<SuperAdminUser | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const userData = window.localStorage.getItem("user");
+    const token = window.localStorage.getItem("token");
+
+    if (!token || !userData) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(userData) as SuperAdminUser;
+      return parsed.role === "SUPER_ADMIN" ? parsed : null;
+    } catch {
+      return null;
+    }
+  });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const userData = window.localStorage.getItem("user");
+    const token = window.localStorage.getItem("token");
+
     if (!token || !userData) {
       router.push("/login");
       return;
     }
+
     try {
-      const parsed = JSON.parse(userData);
+      const parsed = JSON.parse(userData) as SuperAdminUser;
       if (parsed.role !== "SUPER_ADMIN") {
         const roleMap: Record<string, string> = {
           TEACHER: "/teacher",
           BRANCH_ADMIN: "/branch-admin",
           STUDENT: "/student",
         };
-        router.push(roleMap[parsed.role] || "/login");
-        return;
+        router.push(roleMap[parsed.role || ""] || "/login");
       }
-      setUser(parsed);
     } catch {
       router.push("/login");
     }
