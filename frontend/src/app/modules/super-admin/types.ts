@@ -4,3 +4,4 @@ export interface CreateBranchAdminPayload {
   joiningDate?: Date | string;
   designation?: string;
 }
+
