@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import AuthShell from "./auth-shell";
-
 
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -19,21 +19,48 @@ export default function ResetPasswordForm() {
     return { label: "Weak", color: "bg-error" };
   }, [password]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const router = useRouter();
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!token) {
+      setStatus("error");
+      setMessage("Reset token is missing from the URL.");
+      return;
+    }
+
     setLoading(true);
     setStatus("idle");
 
-    setTimeout(() => {
-      if (password.length < 8 || password !== confirmPassword) {
-        setStatus("error");
-        setMessage("Please use a stronger password and make sure both fields match.");
-      } else {
+    if (password.length < 8 || password !== confirmPassword) {
+      setStatus("error");
+      setMessage("Please use a stronger password and make sure both fields match.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { authService } = await import("../services/auth.service");
+      const data = await authService.resetPassword(token, password);
+      
+      if (data?.success) {
         setStatus("success");
         setMessage("Password updated successfully. You can now sign in securely.");
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      } else {
+        setStatus("error");
+        setMessage(data?.message || "Failed to reset password.");
       }
+    } catch (error: any) {
+      setStatus("error");
+      setMessage(error.response?.data?.message || "An error occurred. Please try again.");
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (

@@ -1,14 +1,5 @@
 import Link from "next/link";
-
-export type AuthShellProps = {
-  title: string;
-  subtitle: string;
-  badge?: string;
-  children: React.ReactNode;
-  footerText: string;
-  footerLinkText: string;
-  footerHref: string;
-};
+import { AuthShellProps } from "../types";
 
 export default function AuthShell({
   title,

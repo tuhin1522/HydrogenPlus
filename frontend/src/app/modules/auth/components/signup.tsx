@@ -72,26 +72,8 @@ export default function Signup() {
         password: formData.password,
       });
 
-      if (response.success && response.data?.token) {
+      if (response.success) {
         setStatus("success");
-        setMessage("Account created successfully. Redirecting...");
-
-        // Save the token and user
-        localStorage.setItem("token", response.data.token);
-        if (response.data.user) {
-          localStorage.setItem("user", JSON.stringify(response.data.user));
-          // Dispatch a storage event so Navbar picks it up immediately
-          window.dispatchEvent(new Event("storage"));
-        }
-        
-        // Redirect to dashboard (default is student)
-        const userRole = response.data.user?.role || "STUDENT";
-        setTimeout(() => {
-          if (userRole === "TEACHER") router.push("/teacher");
-          else if (userRole === "SUPER_ADMIN") router.push("/super-admin");
-          else if (userRole === "BRANCH_ADMIN") router.push("/branch-admin");
-          else router.push("/student");
-        }, 1000);
       } else {
         setStatus("error");
         setMessage(response.message || "Signup failed. Please try again.");
@@ -108,6 +90,38 @@ export default function Signup() {
       setLoading(false);
     }
   };
+
+  if (status === "success") {
+    return (
+      <AuthShell
+        title="Check your email"
+        subtitle="Verification link sent successfully"
+        footerText="Didn't receive the email?"
+        footerLinkText="Resend verification link"
+        footerHref="/resend-verification"
+      >
+        <div className="flex flex-col items-center justify-center space-y-4 py-6 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success/10 text-success">
+            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 19v-8.93a2 2 0 01.89-1.664l8-4.75a2 2 0 012.22 0l8 4.75A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-2.25-1.5a2 2 0 00-2.22 0l-2.25 1.5" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-foreground">Verify your email address</h3>
+          <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+            We've sent a verification link to <span className="font-semibold text-foreground">{formData.email}</span>. Please click the link in the email to activate your account and access your dashboard.
+          </p>
+          <div className="pt-4 w-full">
+            <Link
+              href="/login"
+              className="flex w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              Go to sign in
+            </Link>
+          </div>
+        </div>
+      </AuthShell>
+    );
+  }
 
   return (
     <AuthShell
@@ -222,8 +236,8 @@ export default function Signup() {
           </label>
         </div>
 
-        {status !== "idle" && (
-          <div className={`rounded-2xl border px-4 py-3 text-sm ${status === "error" ? "border-error/50 bg-error/10 text-error" : "border-success/50 bg-success/10 text-success"}`}>
+        {status === "error" && (
+          <div className="rounded-2xl border px-4 py-3 text-sm border-error/50 bg-error/10 text-error">
             {message}
           </div>
         )}
