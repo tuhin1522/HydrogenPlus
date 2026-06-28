@@ -24,7 +24,19 @@ const createRoutineZodSchema = z.object({
   endTime: z.coerce.date({ message: "End time is required" }),
 });
 
+/** PATCH /api/v1/routines/:id — update a routine slot */
+const updateRoutineZodSchema = z.object({
+  branchId: z.string().uuid("Invalid Branch ID format").optional(),
+  batchId: z.string().uuid("Invalid Batch ID format").optional(),
+  batchSubjectId: z.string().uuid("Invalid Batch Subject ID format").optional(),
+  room: z.string().min(1, "Room cannot be empty").optional(),
+  dayOfWeek: z.enum(DAY_VALUES, { message: "Invalid day of week" }).optional(),
+  startTime: z.coerce.date().optional(),
+  endTime: z.coerce.date().optional(),
+});
+
 export const RoutineValidation = {
   generateRoutineZodSchema,
   createRoutineZodSchema,
+  updateRoutineZodSchema,
 };

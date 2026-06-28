@@ -15,7 +15,7 @@ router.post(
 );
 router.get("/my-profile", checkAuth(UserRole.STUDENT), studentController.getMyProfile);
 router.get("/all-students", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.TEACHER), studentController.getAllStudents);
-router.get("student/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN), studentController.getStudentById);
+router.get("/student/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN), studentController.getStudentById);
 router.patch("/update-my-profile", checkAuth(UserRole.STUDENT), validateRequest(StudentValidation.updateStudentProfileZodSchema), studentController.updateMyprofile);
 router.patch(
   "/update/:id",

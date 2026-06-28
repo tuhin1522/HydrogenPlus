@@ -59,6 +59,17 @@ const deleteRoutine = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateRoutine = catchAsync(async (req: Request, res: Response) => {
+  const routine = await routineService.updateRoutine(req.params.id as string, req.body);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Routine updated successfully!",
+    data: routine,
+  });
+});
+
 const clearBranchRoutines = catchAsync(async (req: Request, res: Response) => {
   const result = await routineService.clearBranchRoutines(req.params.branchId as string);
 
@@ -75,6 +86,7 @@ export const routineController = {
   getAllRoutines,
   getRoutineById,
   getBatchSchedule,
+  updateRoutine,
   deleteRoutine,
   clearBranchRoutines,
 };

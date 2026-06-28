@@ -9,6 +9,9 @@ import { subjectRoutes } from "../modules/subject/subject.routes";
 import { routineRoutes } from "../modules/routine/routine.routes";
 import { batchSubjectRoutes } from "../modules/batchSubject/batchSubject.routes";
 import { branchAdminRoutes } from "../modules/branchAdmin/branchAdmin.routes";
+import { courseRoutes } from "../modules/course/course.routes";
+import { analyticsRoutes } from "../modules/analytics/analytics.routes";
+import { systemRoutes } from "../modules/system/system.routes";
 
 const router = Router();
 
@@ -22,5 +25,8 @@ router.use("/subjects", subjectRoutes);
 router.use("/routines", routineRoutes);
 router.use("/batch-subjects", batchSubjectRoutes);
 router.use("/branch-admins", branchAdminRoutes);
+router.use("/courses", courseRoutes);
+router.use("/analytics", analyticsRoutes);
+router.use("/system", systemRoutes);
 
 export const indexRoutes = router;

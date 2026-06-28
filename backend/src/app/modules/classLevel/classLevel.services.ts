@@ -6,7 +6,7 @@ import AppError from "@/app/errorHelpers/appError";
 import httpStatus from "http-status";
 
 const createClassLevel = async (payload: IClassLevel) => {
-  const { name, branchId } = payload;
+  const { name } = payload;
   
   const isClassLevelExist = await prisma.classLevel.findUnique({
     where: { name }

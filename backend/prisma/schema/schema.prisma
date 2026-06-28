@@ -68,7 +68,11 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
-  admin               Admin?
+  admin         Admin?
+  
+  payments      Payment[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -428,4 +432,91 @@ model Admin {
     @@index([email])
     @@index([isDeleted])
     @@map("admins")
+}
+
+//////////////////////////////////////////////////////////
+// PAYMENT
+//////////////////////////////////////////////////////////
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  amount        Float
+  currency      String        @default("USD")
+  status        PaymentStatus @default(PENDING)
+  paymentMethod String?
+  transactionId String?       @unique
+  
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("payments")
+}
+
+//////////////////////////////////////////////////////////
+// NOTIFICATION
+//////////////////////////////////////////////////////////
+
+model Notification {
+  id          String   @id @default(uuid())
+  title       String
+  message     String
+  type        String   @default("INFO")
+  isRead      Boolean  @default(false)
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+//////////////////////////////////////////////////////////
+// SYSTEM SETTING
+//////////////////////////////////////////////////////////
+
+model SystemSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+//////////////////////////////////////////////////////////
+// AUDIT LOG
+//////////////////////////////////////////////////////////
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String
+  entityType  String
+  entityId    String?
+  details     String?
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@map("audit_logs")
 }

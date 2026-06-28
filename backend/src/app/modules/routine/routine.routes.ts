@@ -32,6 +32,13 @@ router.post(
   routineController.createRoutine
 );
 
+router.patch(
+  "/update/:id",
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
+  validateRequest(RoutineValidation.updateRoutineZodSchema),
+  routineController.updateRoutine
+);
+
 router.delete(
   "/branch/:branchId",
   checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
