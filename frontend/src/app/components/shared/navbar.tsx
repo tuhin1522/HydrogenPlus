@@ -37,6 +37,27 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDark((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     const checkUser = () => {
@@ -74,6 +95,7 @@ export default function Navbar() {
 
   const hover = "hover:bg-secondary";
   const muted = "text-muted-foreground";
+  const accent = isDark ? "bg-[#86F05C] hover:bg-[#B7FF63]" : "bg-[#2BCA7A] hover:bg-[#86F05C]";
 
   return (
     <header
