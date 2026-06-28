@@ -37,3 +37,13 @@ export const getAllTeachers = async () => {
   const response = await axiosInstance.get("/teachers/all-teachers");
   return response.data;
 };
+
+export const getAllStudents = async () => {
+  const response = await axiosInstance.get("/students/all-students");
+  return response.data;
+};
+
+export const getAllBatches = async () => {
+  const response = await axiosInstance.get("/batches");
+  return response.data;
+};
