@@ -161,6 +161,24 @@ const deleteRoutine = async (id: string) => {
   return (prisma.routine as any).delete({ where: { id } });
 };
 
+const updateRoutine = async (id: string, payload: Partial<ICreateRoutine>) => {
+  await getRoutineById(id);
+  return (prisma.routine as any).update({
+    where: { id },
+    data: payload,
+    include: {
+      branch: { select: { id: true, name: true } },
+      batch: { select: { id: true, name: true } },
+      batchSubject: {
+        include: {
+          subject: { select: { id: true, name: true } },
+          teacher: { select: { id: true, user: { select: { name: true } } } },
+        },
+      },
+    },
+  });
+};
+
 /** Clear all routines for a branch (usually before re-generating) */
 const clearBranchRoutines = async (branchId: string) => {
   const branch = await prisma.branch.findUnique({ where: { id: branchId } });
@@ -177,6 +195,7 @@ export const routineService = {
   getAllRoutines,
   getRoutineById,
   getBatchSchedule,
+  updateRoutine,
   deleteRoutine,
   clearBranchRoutines,
 };

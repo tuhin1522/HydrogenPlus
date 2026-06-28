@@ -5,9 +5,15 @@ import { ICreateStudentProfile } from "./student.interface";
 import { studentService } from './student.service';
 import AppError from "@/app/errorHelpers/appError";
 import httpStatus from "http-status";
+import { UserRole } from "@/generated/prisma";
 
 const createStudentProfile = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.userId;
+  const isStudent = req.user.role === UserRole.STUDENT;
+  const userId = isStudent ? req.user.userId : (req.body.userId || req.user.userId);
+
+  if (!isStudent && !req.body.userId) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User ID is required when creating a student profile as admin.");
+  }
 
   const studentData = {
     ...req.body,

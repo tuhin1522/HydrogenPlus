@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import AuthShell from "./auth-shell";
-import { authService } from "../services/auth.service";
+import { forgotPassword } from "../services/auth.service";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -23,7 +23,7 @@ export default function ForgotPasswordForm() {
     }
 
     try {
-      const data = await authService.forgotPassword(email);
+      const data = await forgotPassword(email);
 
       if (data?.success) {
         setStatus("success");

@@ -14,6 +14,12 @@ const createStudentProfile = async (data: ICreateStudentProfile) => {
 
   return prisma.studentProfile.create({
     data,
+  }).then(async (student) => {
+    await prisma.user.update({
+      where: { id: data.userId },
+      data: { role: 'STUDENT' },
+    });
+    return student;
   });
 };
 

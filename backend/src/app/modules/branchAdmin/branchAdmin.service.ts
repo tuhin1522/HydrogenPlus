@@ -24,7 +24,7 @@ const createBranchAdmin = async (payload: ICreateBranchAdmin) => {
     throw new AppError(httpStatus.NOT_FOUND, "User not found.");
   }
 
-  if (user.role !== "TEACHER") {
+  if (user.role !== "TEACHER" && user.role !== "BRANCH_ADMIN") {
     throw new AppError(httpStatus.BAD_REQUEST, "Only teachers can be assigned as a branch admin.");
   }
 
@@ -113,6 +113,13 @@ const deleteBranchAdmin = async (id: string) => {
   const branchAdmin = await prisma.branchAdminProfile.delete({
     where: { id },
   });
+  
+  // Revert user role to TEACHER
+  await prisma.user.update({
+    where: { id: branchAdmin.userId },
+    data: { role: "TEACHER" },
+  });
+
   return branchAdmin;
 };
 
