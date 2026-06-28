@@ -131,7 +131,7 @@ export default function Navbar() {
             aria-label="Search"
             className={`rounded-full p-2.5 transition ${hover}`}
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <svg suppressHydrationWarning viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
               <circle cx="11" cy="11" r="6" />
               <path d="m20 20-4.2-4.2" />
             </svg>
@@ -175,7 +175,7 @@ export default function Navbar() {
             className={`rounded-full border border-border p-2.5 transition ${hover}`}
             aria-label="Open navigation menu"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <svg suppressHydrationWarning viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M4 7h16" />
               <path d="M4 12h16" />
               <path d="M4 17h16" />
