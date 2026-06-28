@@ -49,28 +49,35 @@ const sendVerificationEmail = async (
   const verificationUrl = `http://localhost:3000/verify?token=${token}`;
 
   const htmlContent = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Welcome ${name}!</h2>
-      <p>Thank you for signing up. Please verify your email address to complete your registration.</p>
-      
-      <div style="margin: 30px 0;">
-        <a href="${verificationUrl}" 
-           style="background-color: #007bff; color: white; padding: 12px 24px; 
-                  text-decoration: none; border-radius: 4px; display: inline-block;">
-          Verify Email
-        </a>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9fafb; padding: 40px 20px; border-radius: 8px;">
+      <div style="background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
+        <h2 style="color: #007bff; font-size: 20px; margin-bottom: 24px; font-weight: 700; letter-spacing: 0.5px;">Hydrogen Plus Coaching Center</h2>
+        <h1 style="color: #111827; font-size: 24px; margin-bottom: 8px; margin-top: 0;">Welcome, ${name}!</h1>
+        <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+          Thank you for signing up at Hydrogen Plus Coaching Center. We're excited to have you on board. Please verify your email address to get started.
+        </p>
+        
+        <div style="margin: 32px 0;">
+          <a href="${verificationUrl}" 
+             style="background-color: #007bff; color: #ffffff; padding: 14px 28px; 
+                    text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+            Verify Email Address
+          </a>
+        </div>
+        
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 12px;">Or copy and paste this link into your browser:</p>
+        <p style="background-color: #f3f4f6; padding: 12px; border-radius: 6px; word-break: break-all; margin-top: 0; font-size: 13px;">
+          <a href="${verificationUrl}" style="color: #007bff; text-decoration: none;">${verificationUrl}</a>
+        </p>
+        
+        <div style="margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 24px;">
+          <p style="color: #9ca3af; font-size: 13px; line-height: 1.5; margin: 0;">
+            This link will expire in 24 hours.<br>
+            If you didn't create this account, you can safely ignore this email.<br><br>
+            &copy; ${new Date().getFullYear()} Hydrogen Plus Coaching Center
+          </p>
+        </div>
       </div>
-      
-      <p>Or copy this link: <a href="${verificationUrl}">${verificationUrl}</a></p>
-      
-      <p style="color: #666; font-size: 12px;">
-        This link will expire in 24 hours.
-      </p>
-      
-      <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-      <p style="color: #999; font-size: 12px;">
-        If you didn't create this account, please ignore this email.
-      </p>
     </div>
   `;
 
@@ -93,23 +100,35 @@ const sendPasswordResetEmail = async (
   const resetUrl = `http://localhost:3000/reset-password?token=${token}`;
 
   const htmlContent = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Password Reset Request</h2>
-      <p>Hi ${name}, we received a request to reset your password.</p>
-      
-      <div style="margin: 30px 0;">
-        <a href="${resetUrl}" 
-           style="background-color: #dc3545; color: white; padding: 12px 24px; 
-                  text-decoration: none; border-radius: 4px; display: inline-block;">
-          Reset Password
-        </a>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9fafb; padding: 40px 20px; border-radius: 8px;">
+      <div style="background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
+        <h2 style="color: #007bff; font-size: 20px; margin-bottom: 24px; font-weight: 700; letter-spacing: 0.5px;">Hydrogen Plus Coaching Center</h2>
+        <h1 style="color: #111827; font-size: 24px; margin-bottom: 8px; margin-top: 0;">Reset Your Password</h1>
+        <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+          Hi ${name}, we received a request to reset your password for your Hydrogen Plus Coaching Center account.
+        </p>
+        
+        <div style="margin: 32px 0;">
+          <a href="${resetUrl}" 
+             style="background-color: #007bff; color: #ffffff; padding: 14px 28px; 
+                    text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+            Reset Password
+          </a>
+        </div>
+        
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 12px;">Or copy and paste this link into your browser:</p>
+        <p style="background-color: #f3f4f6; padding: 12px; border-radius: 6px; word-break: break-all; margin-top: 0; font-size: 13px;">
+          <a href="${resetUrl}" style="color: #007bff; text-decoration: none;">${resetUrl}</a>
+        </p>
+        
+        <div style="margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 24px;">
+          <p style="color: #9ca3af; font-size: 13px; line-height: 1.5; margin: 0;">
+            This link will expire in 1 hour.<br>
+            If you did not request a password reset, no further action is required.<br><br>
+            &copy; ${new Date().getFullYear()} Hydrogen Plus Coaching Center
+          </p>
+        </div>
       </div>
-      
-      <p>Or copy this link: <a href="${resetUrl}">${resetUrl}</a></p>
-      
-      <p style="color: #666; font-size: 12px;">
-        This link will expire in 1 hour. If you did not request this, please ignore this email.
-      </p>
     </div>
   `;
 
