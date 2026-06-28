@@ -39,7 +39,7 @@ const validateSignup = [
     .notEmpty()
     .withMessage('Phone number is required')
     .matches(/^(?:\+880|880|0)1[3-9]\d{8}$/)
-    .withMessage('Please provide a valid phone number'),
+    .withMessage('Please provide a valid Bangladeshi phone number (e.g., 01712345678)'),
 
   // Password validation
   body('password')

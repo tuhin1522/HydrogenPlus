@@ -11,9 +11,10 @@ const signupHandler = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     httpStatusCode: 201,
     success: true,
-    message: "User registered successfully. Please check your email to verify your account.",
+    message: result.message,
     data: {
-      userId: result.userId,
+      token: result.token,
+      user: result.user,
     },
   });
 });

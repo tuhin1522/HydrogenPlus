@@ -130,7 +130,7 @@ const signupUser = async (
   email: string,
   phone: string,
   password: string
-): Promise<{ success: boolean; message: string; userId?: string }> => {
+): Promise<{ success: boolean; message: string; token: string; user: any }> => {
   try {
     // Hash password
     const hashedPassword = await bcryptjs.hash(password, 10);
@@ -151,22 +151,34 @@ const signupUser = async (
       // Generate verification token
       const verificationToken = await generateVerificationToken(email);
 
-      // Send verification email
-      await sendVerificationEmail(email, name, verificationToken);
+      // Send verification email asynchronously (do not await) to speed up signup
+      sendVerificationEmail(email, name, verificationToken).catch(console.error);
 
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: '7d' }
+      );
 
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user;
 
       return {
         success: true,
-        message:
-          'Signup successful! Check your email to verify your account.',
-        userId: user.id,
+        message: 'Signup successful! Welcome.',
+        token,
+        user: userWithoutPassword,
       };
     } catch (emailError: any) {
-      // Rollback if email fails to send
+      // Rollback if email logic fails entirely
       await prisma.verificationToken.deleteMany({ where: { email } });
       await prisma.user.delete({ where: { id: user.id } });
-      throw new Error(`Unable to send verification email (${emailError.message}). Please check your connection and try again.`);
+      throw new Error(`Unable to complete signup (${emailError.message}).`);
     }
   } catch (error: any) {
     throw new Error(`Signup failed: ${error.message}`);
@@ -233,11 +245,6 @@ const loginUser = async (
 
     if (!user) {
       throw new Error(AUTH_ERRORS.INVALID_CREDENTIALS);
-    }
-
-    // Check if email is verified
-    if (!user.emailVerified) {
-      throw new Error(AUTH_ERRORS.EMAIL_NOT_VERIFIED);
     }
 
     // Compare password
