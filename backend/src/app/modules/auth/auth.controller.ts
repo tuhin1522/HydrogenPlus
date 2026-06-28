@@ -13,8 +13,7 @@ const signupHandler = catchAsync(async (req: Request, res: Response) => {
     success: true,
     message: result.message,
     data: {
-      token: result.token,
-      user: result.user,
+      userId: result.userId,
     },
   });
 });
@@ -51,7 +50,11 @@ const verifyEmailHandler = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     httpStatusCode: 200,
     success: true,
-    message: "Email verified successfully.",
+    message: result.message,
+    data: {
+      token: result.token,
+      user: result.user,
+    },
   });
 });
 

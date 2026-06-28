@@ -119,10 +119,7 @@ const sendPasswordResetEmail = async (
     subject: 'Reset Your Password',
     html: htmlContent,
   });
-};
-
-
-/**
+};/**
  * Create new user with signup
  */
 const signupUser = async (
@@ -130,7 +127,7 @@ const signupUser = async (
   email: string,
   phone: string,
   password: string
-): Promise<{ success: boolean; message: string; token: string; user: any }> => {
+): Promise<{ success: boolean; message: string; userId?: string }> => {
   try {
     // Hash password
     const hashedPassword = await bcryptjs.hash(password, 10);
@@ -154,25 +151,10 @@ const signupUser = async (
       // Send verification email asynchronously (do not await) to speed up signup
       sendVerificationEmail(email, name, verificationToken).catch(console.error);
 
-      // Generate JWT token
-      const token = jwt.sign(
-        {
-          userId: user.id,
-          email: user.email,
-          role: user.role,
-        },
-        process.env.JWT_SECRET!,
-        { expiresIn: '7d' }
-      );
-
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
-
       return {
         success: true,
-        message: 'Signup successful! Welcome.',
-        token,
-        user: userWithoutPassword,
+        message: 'Signup successful! Please check your email to verify your account.',
+        userId: user.id,
       };
     } catch (emailError: any) {
       // Rollback if email logic fails entirely
@@ -186,11 +168,11 @@ const signupUser = async (
 };
 
 /**
- * Verify email using token
+ * Verify email using token and return auth token/user directly for auto-login
  */
 const verifyEmail = async (
   token: string
-): Promise<{ success: boolean; message: string }> => {
+): Promise<{ success: boolean; message: string; token: string; user: any }> => {
   try {
     // Find verification token
     const verificationToken = await prisma.verificationToken.findUnique({
@@ -211,7 +193,7 @@ const verifyEmail = async (
     }
 
     // Update user as verified
-    await prisma.user.update({
+    const user = await prisma.user.update({
       where: { email: verificationToken.email },
       data: { emailVerified: true },
     });
@@ -221,9 +203,25 @@ const verifyEmail = async (
       where: { token },
     });
 
+    // Generate JWT token for auto-login
+    const jwtToken = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: '7d' }
+    );
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+
     return {
       success: true,
-      message: 'Email verified successfully! You can now login.',
+      message: 'Email verified successfully! Welcome to your dashboard.',
+      token: jwtToken,
+      user: userWithoutPassword,
     };
   } catch (error: any) {
     throw new Error(error.message || 'Email verification failed');
@@ -245,6 +243,11 @@ const loginUser = async (
 
     if (!user) {
       throw new Error(AUTH_ERRORS.INVALID_CREDENTIALS);
+    }
+
+    // Check if email is verified
+    if (!user.emailVerified) {
+      throw new Error(AUTH_ERRORS.EMAIL_NOT_VERIFIED);
     }
 
     // Compare password
