@@ -35,6 +35,8 @@ export default function SuperAdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const normalizedPath = (pathname || "").split("?")[0].split("#")[0];
+  const activeSection = normalizedPath.replace(/^\/super-admin\/?/, "").split("/")[0] || "overview";
   const [user] = useState<SuperAdminUser | null>(() => {
     if (typeof window === "undefined") {
       return null;
@@ -130,12 +132,12 @@ export default function SuperAdminLayout({
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {MENU_ITEMS.map((item) => {
-            const isActive = pathname === item.path || pathname.startsWith(item.path + "/");
+            const isActive = activeSection === item.id;
             return (
               <Link
                 key={item.id}
                 href={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 group ${
                   isActive
                     ? "bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20"
                     : "text-[#71717A] hover:bg-[#1C1917] hover:text-[#F2F2F2]"
@@ -190,7 +192,7 @@ export default function SuperAdminLayout({
             <span>Super Admin</span>
             <span>/</span>
             <span className="text-[#F2F2F2] font-medium capitalize">
-              {MENU_ITEMS.find((m) => pathname.startsWith(m.path))?.label || "Dashboard"}
+              {MENU_ITEMS.find((m) => activeSection === m.id)?.label || "Dashboard"}
             </span>
           </div>
           <div className="flex items-center gap-3">
