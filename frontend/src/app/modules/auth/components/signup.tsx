@@ -1,58 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import AuthShell from "./auth-shell";
 import Link from "next/link";
-import { useMemo, useState } from "react";
-
-type ThemeMode = "dark" | "light";
-
-const steps = [
-  { id: 1, title: "Account" },
-  { id: 2, title: "Security" },
-  { id: 3, title: "Consent" },
-  { id: 4, title: "Ready" },
-];
-
-const metricCards = [
-  { value: "2.4k+", label: "schools onboarded" },
-  { value: "98.7%", label: "rollout success" },
-  { value: "24/7", label: "support coverage" },
-];
-
-const benefits = [
-  "Unified attendance, grading, and communication workflows",
-  "AI-powered insights for district and campus leaders",
-  "Enterprise-grade security with SSO and audit trails",
-];
-
-function getPasswordStrength(password: string) {
-  const checks = [
-    password.length >= 8,
-    /[A-Z]/.test(password),
-    /[0-9]/.test(password),
-    /[^A-Za-z0-9]/.test(password),
-  ];
-
-  const score = checks.filter(Boolean).length;
-  let label = "Very weak";
-  let tone = "bg-[#EF4343]";
-
-  if (score >= 3) {
-    label = "Strong";
-    tone = "bg-[#2BCA7A]";
-  } else if (score === 2) {
-    label = "Good";
-    tone = "bg-[#86F05C]";
-  } else if (score === 1) {
-    label = "Fair";
-    tone = "bg-[#A9B7B4]";
-  }
-
-  return { score, label, tone, checks };
-}
 
 export default function Signup() {
-  const [theme, setTheme] = useState<ThemeMode>("dark");
-  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -143,41 +95,66 @@ export default function Signup() {
         }
       }
     }
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+    setStatus("idle");
+
+    setTimeout(() => {
+      if (formData.password !== formData.confirmPassword) {
+        setStatus("error");
+        setMessage("Passwords do not match.");
+      } else if (!formData.agreeTerms) {
+        setStatus("error");
+        setMessage("Please agree to the Terms & Conditions.");
+      } else {
+        setStatus("success");
+        setMessage("Account created successfully. Welcome to Hydrogen Plus.");
+      }
+      setLoading(false);
+    }, 800);
   };
 
   return (
-    <main className={`min-h-screen transition-colors duration-300 ${isDark ? "bg-[#081717] text-[#F3F7F6]" : "bg-[#F4FFF8] text-[#081717]"}`}>
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-        <header className={`flex flex-wrap items-center justify-between gap-3 rounded-[28px] border px-4 py-4 shadow-[0_20px_50px_rgba(0,0,0,0.14)] sm:px-6 ${surface} ${border}`}>
-          <div className="flex items-center gap-3">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${accent}`}>
-              <span className="text-lg font-semibold text-[#081717]">EP</span>
-            </div>
-            <div>
-              <p className="text-sm font-semibold tracking-[0.2em] text-[#86F05C] uppercase">
-                EduBranch Pro
-              </p>
-              <p className={`text-sm ${isDark ? "text-[#A9B7B4]" : "text-[#4B5A58]"}`}>
-                Education management system
-              </p>
-            </div>
-          </div>
+    <AuthShell
+      title="Create an account"
+      subtitle="Sign up for your coaching and branch management workspace"
+      footerText="Already have an account?"
+      footerLinkText="Sign in"
+      footerHref="/login"
+    >
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="fullName" className="mb-2 block text-sm font-medium text-foreground">
+            Full Name
+          </label>
+          <input
+            id="fullName"
+            name="fullName"
+            type="text"
+            value={formData.fullName}
+            onChange={handleChange}
+            placeholder="Alicia Johnson"
+            className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary"
+            required
+          />
+        </div>
 
-          <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? "text-[#A9B7B4] hover:bg-[#0D2A2B]" : "text-[#4B5A58] hover:bg-[#EDF9F1]"}`}
-            >
-              Back to overview
-            </Link>
-            <button
-              type="button"
-              aria-label="Toggle color theme"
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              className={`rounded-full border px-3 py-2 text-sm font-medium transition ${border} ${isDark ? "hover:bg-[#0D2A2B]" : "hover:bg-[#EDF9F1]"}`}
-            >
-              {isDark ? "☀️ Light" : "🌙 Dark"}
-            </button>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="alicia@school.edu"
+              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary"
+              required
+            />
           </div>
         </header>
 
@@ -318,90 +295,52 @@ export default function Signup() {
                 </>
               )}
 
-              {currentStep === 2 && (
-                <>
-                  <div>
-                    <label htmlFor="password" className="mb-2 block text-sm font-medium">
-                      Password
-                    </label>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Create a strong password"
-                      className={`w-full rounded-2xl border px-4 py-3 outline-none transition focus:ring-2 ${border} ${focus} ${isDark ? "bg-[#081717]" : "bg-white"}`}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium">
-                      Confirm Password
-                    </label>
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="Re-enter your password"
-                      className={`w-full rounded-2xl border px-4 py-3 outline-none transition focus:ring-2 ${border} ${focus} ${isDark ? "bg-[#081717]" : "bg-white"}`}
-                      required
-                    />
-                  </div>
+        <div>
+          <label htmlFor="password" className="mb-2 block text-sm font-medium text-foreground">
+            Password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Create a strong password"
+            className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary"
+            required
+          />
+        </div>
 
-                  <div className={`rounded-[22px] border p-4 ${border} ${muted}`}>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold">Password strength</p>
-                      <p className="text-sm font-semibold text-[#86F05C]">{passwordStrength.label}</p>
-                    </div>
-                    <div className={`mt-3 h-2 overflow-hidden rounded-full ${isDark ? "bg-[#081717]" : "bg-[#E7F5EB]"}`}>
-                      <div className={`h-full rounded-full ${passwordStrength.tone}`} style={{ width: `${(passwordStrength.score / 4) * 100}%` }} />
-                    </div>
-                    <ul className="mt-4 space-y-2 text-sm">
-                      {[
-                        "8+ characters",
-                        "One uppercase letter",
-                        "One number",
-                        "One special symbol",
-                      ].map((item, index) => (
-                        <li key={item} className="flex items-center gap-2">
-                          <span className={`h-2.5 w-2.5 rounded-full ${passwordStrength.checks[index] ? "bg-[#2BCA7A]" : isDark ? "bg-[#1D3E3E]" : "bg-[#D5E8DD]"}`} />
-                          <span className={isDark ? "text-[#A9B7B4]" : "text-[#4B5A58]"}>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </>
-              )}
+        <div>
+          <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-foreground">
+            Confirm Password
+          </label>
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Re-enter your password"
+            className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary"
+            required
+          />
+        </div>
 
-              {currentStep === 3 && (
-                <div className={`rounded-[24px] border p-5 ${border} ${muted}`}>
-                  <div className="flex items-start gap-3">
-                    <input
-                      id="agreeTerms"
-                      name="agreeTerms"
-                      type="checkbox"
-                      checked={formData.agreeTerms}
-                      onChange={handleChange}
-                      className="mt-1 h-4 w-4 rounded border-[#1D3E3E] text-[#86F05C] focus:ring-[#86F05C]"
-                      required
-                    />
-                    <label htmlFor="agreeTerms" className="text-sm leading-6">
-                      I agree to the Terms & Conditions and the Privacy Policy for EduBranch Pro. I understand that my data will be processed to provision the platform and support my onboarding journey.
-                    </label>
-                  </div>
-                  <div className="mt-4 rounded-2xl border border-dashed border-[#2BCA7A] p-4 text-sm">
-                    <p className="font-semibold">Included with your account</p>
-                    <ul className="mt-2 space-y-2 text-[#A9B7B4]">
-                      <li>• District-wide analytics dashboards</li>
-                      <li>• Role-based permissions and SSO support</li>
-                      <li>• Onboarding concierge and implementation playbooks</li>
-                    </ul>
-                  </div>
-                </div>
-              )}
+        <div className="flex items-center gap-3">
+          <input
+            id="agreeTerms"
+            name="agreeTerms"
+            type="checkbox"
+            checked={formData.agreeTerms}
+            onChange={handleChange}
+            className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-primary"
+            required
+          />
+          <label htmlFor="agreeTerms" className="text-sm text-muted-foreground">
+            I agree to the Terms & Conditions and Privacy Policy.
+          </label>
+        </div>
 
               {currentStep === 4 && (
                 <div className={`rounded-[24px] border p-6 text-center ${border} ${isDark ? "bg-[#0D2A2B]" : "bg-[#F7FFF8]"}`}>
@@ -430,29 +369,15 @@ export default function Signup() {
                 </div>
               )}
 
-              {currentStep < 4 && (
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleBack}
-                    disabled={currentStep === 1}
-                    className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition ${border} ${isDark ? "hover:bg-[#0D2A2B] disabled:opacity-40" : "hover:bg-[#EEFDF4] disabled:opacity-40"}`}
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={currentStep === 3 ? handleSubmit : handleNext}
-                    className={`rounded-full px-5 py-2.5 text-sm font-semibold text-[#081717] transition ${isDark ? "bg-[#86F05C] hover:bg-[#B7FF63]" : "bg-[#2BCA7A] hover:bg-[#86F05C]"}`}
-                  >
-                    {currentStep === 3 ? "Create account" : "Continue"}
-                  </button>
-                </div>
-              )}
-            </form>
-          </section>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button type="button" className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary">
+            Google
+          </button>
+          <button type="button" className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition hover:bg-secondary">
+            Microsoft
+          </button>
         </div>
-      </div>
-    </main>
+      </form>
+    </AuthShell>
   );
 }
