@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import AuthShell from "./auth-shell";
 
-
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

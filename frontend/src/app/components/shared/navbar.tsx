@@ -62,7 +62,7 @@ export default function Navbar() {
     localStorage.removeItem("user");
     setUser(null);
     window.dispatchEvent(new Event("storage"));
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   useEffect(() => {
