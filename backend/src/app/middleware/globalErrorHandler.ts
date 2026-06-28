@@ -16,7 +16,7 @@ export const globalErrorHandler = async (
   // Log full error details for debugging
   if (envVars.NODE_ENV === "development") {
     console.log("❌ Error from global error handler:");
-    console.log(JSON.stringify(err, null, 2));
+    console.error(err);
     
     // Special logging for Cloudinary 403 errors
     if (err.http_code === 403 || err.message?.includes("403")) {

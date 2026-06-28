@@ -12,13 +12,36 @@ const axiosInstance = axios.create({
 
 // Attach JWT Token automatically
 axiosInstance.interceptors.request.use((config) => {
+  if (typeof window === "undefined") {
+    return config;
+  }
+
   const token = localStorage.getItem("token");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else if (!config.url?.includes("/auth/")) {
+    config.headers.Authorization = undefined;
   }
 
   return config;
 });
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (typeof window !== "undefined") {
+      const status = error?.response?.status;
+      const isAuthError = status === 401 || status === 403;
+      const token = localStorage.getItem("token");
+
+      if (isAuthError && !token) {
+        window.location.href = "/login";
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;

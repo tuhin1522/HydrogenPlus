@@ -11,13 +11,22 @@ const MENU_ITEMS = [
   { id: "students", label: "Students", icon: "🎓", path: "/super-admin/students" },
   { id: "teachers", label: "Teachers", icon: "👩‍🏫", path: "/super-admin/teachers" },
   { id: "academic", label: "Academic", icon: "📚", path: "/super-admin/academic" },
+  { id: "routine", label: "Class Routine", icon: "🗓️", path: "/super-admin/routine" },
+  { id: "exams", label: "Exams", icon: "📝", path: "/super-admin/exams" },
   { id: "courses", label: "Courses", icon: "🎯", path: "/super-admin/courses" },
+  { id: "payments", label: "Payments", icon: "💳", path: "/super-admin/payments" },
   { id: "analytics", label: "Analytics", icon: "📈", path: "/super-admin/analytics" },
   { id: "notifications", label: "Notifications", icon: "🔔", path: "/super-admin/notifications" },
   { id: "users", label: "All Users", icon: "👥", path: "/super-admin/users" },
   { id: "audit-logs", label: "Audit Logs", icon: "📋", path: "/super-admin/audit-logs" },
   { id: "settings", label: "Settings", icon: "⚙️", path: "/super-admin/settings" },
 ];
+
+interface SuperAdminUser {
+  name?: string;
+  email?: string;
+  role?: string;
+}
 
 export default function SuperAdminLayout({
   children,
@@ -26,28 +35,52 @@ export default function SuperAdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const normalizedPath = (pathname || "").split("?")[0].split("#")[0];
+  const activeSection = normalizedPath.replace(/^\/super-admin\/?/, "").split("/")[0] || "overview";
+  const [user] = useState<SuperAdminUser | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const userData = window.localStorage.getItem("user");
+    const token = window.localStorage.getItem("token");
+
+    if (!token || !userData) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(userData) as SuperAdminUser;
+      return parsed.role === "SUPER_ADMIN" ? parsed : null;
+    } catch {
+      return null;
+    }
+  });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const userData = window.localStorage.getItem("user");
+    const token = window.localStorage.getItem("token");
+
     if (!token || !userData) {
       router.push("/login");
       return;
     }
+
     try {
-      const parsed = JSON.parse(userData);
+      const parsed = JSON.parse(userData) as SuperAdminUser;
       if (parsed.role !== "SUPER_ADMIN") {
         const roleMap: Record<string, string> = {
           TEACHER: "/teacher",
           BRANCH_ADMIN: "/branch-admin",
           STUDENT: "/student",
         };
-        router.push(roleMap[parsed.role] || "/login");
-        return;
+        router.push(roleMap[parsed.role || ""] || "/login");
       }
-      setUser(parsed);
     } catch {
       router.push("/login");
     }
@@ -99,12 +132,12 @@ export default function SuperAdminLayout({
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {MENU_ITEMS.map((item) => {
-            const isActive = pathname === item.path || pathname.startsWith(item.path + "/");
+            const isActive = activeSection === item.id;
             return (
               <Link
                 key={item.id}
                 href={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 group ${
                   isActive
                     ? "bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20"
                     : "text-[#71717A] hover:bg-[#1C1917] hover:text-[#F2F2F2]"
@@ -159,7 +192,7 @@ export default function SuperAdminLayout({
             <span>Super Admin</span>
             <span>/</span>
             <span className="text-[#F2F2F2] font-medium capitalize">
-              {MENU_ITEMS.find((m) => pathname.startsWith(m.path))?.label || "Dashboard"}
+              {MENU_ITEMS.find((m) => activeSection === m.id)?.label || "Dashboard"}
             </span>
           </div>
           <div className="flex items-center gap-3">

@@ -3,13 +3,40 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type BranchAdminUser = {
+  name?: string;
+  email?: string;
+  role?: string;
+};
+
 export default function BranchAdminDashboard() {
-  const [user, setUser] = useState<any>(null);
   const router = useRouter();
+  const [user] = useState<BranchAdminUser | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const userData = window.localStorage.getItem("user");
+    const token = window.localStorage.getItem("token");
+
+    if (!token || !userData) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(userData) as BranchAdminUser;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const token = window.localStorage.getItem("token");
+    const userData = window.localStorage.getItem("user");
 
     if (!token || !userData) {
       router.push("/login");
@@ -17,8 +44,8 @@ export default function BranchAdminDashboard() {
     }
 
     try {
-      setUser(JSON.parse(userData));
-    } catch (e) {
+      JSON.parse(userData) as BranchAdminUser;
+    } catch {
       router.push("/login");
     }
   }, [router]);

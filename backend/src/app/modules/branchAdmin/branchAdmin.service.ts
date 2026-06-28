@@ -102,6 +102,36 @@ const getBranchAdminById = async (id: string) => {
 };
 
 const updateBranchAdmin = async (id: string, payload: IUpdateBranchAdmin) => {
+  const existing = await prisma.branchAdminProfile.findUnique({ where: { id } });
+  
+  if (!existing) {
+    throw new AppError(httpStatus.NOT_FOUND, "Branch admin not found");
+  }
+
+  if (payload.userId && payload.userId !== existing.userId) {
+    const newUser = await prisma.user.findUnique({ where: { id: payload.userId } });
+    if (!newUser || (newUser.role !== "TEACHER" && newUser.role !== "BRANCH_ADMIN")) {
+      throw new AppError(httpStatus.BAD_REQUEST, "New user must be a teacher");
+    }
+
+    const newAdminExist = await prisma.branchAdminProfile.findUnique({ where: { userId: payload.userId } });
+    if (newAdminExist) {
+      throw new AppError(httpStatus.CONFLICT, "New user is already assigned as a branch admin");
+    }
+
+    // Revert old user role
+    await prisma.user.update({
+      where: { id: existing.userId },
+      data: { role: "TEACHER" },
+    });
+    
+    // Set new user role
+    await prisma.user.update({
+      where: { id: payload.userId },
+      data: { role: "BRANCH_ADMIN" },
+    });
+  }
+
   const branchAdmin = await prisma.branchAdminProfile.update({
     where: { id },
     data: payload,
@@ -110,6 +140,14 @@ const updateBranchAdmin = async (id: string, payload: IUpdateBranchAdmin) => {
 };
 
 const deleteBranchAdmin = async (id: string) => {
+  const existing = await prisma.branchAdminProfile.findUnique({
+    where: { id },
+  });
+
+  if (!existing) {
+    throw new AppError(httpStatus.NOT_FOUND, "Branch admin not found or already deleted");
+  }
+
   const branchAdmin = await prisma.branchAdminProfile.delete({
     where: { id },
   });

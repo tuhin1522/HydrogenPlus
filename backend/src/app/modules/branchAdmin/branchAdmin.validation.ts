@@ -8,6 +8,7 @@ const createBranchAdminZodSchema = z.object({
 });
 
 const updateBranchAdminZodSchema = z.object({
+  userId: z.string().uuid("Invalid User ID format").optional(),
   branchId: z.string().uuid("Invalid Branch ID format").optional(),
   joiningDate: z.string().datetime({ offset: true }).optional().nullable(),
   designation: z.string().optional().nullable(),

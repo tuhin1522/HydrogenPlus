@@ -43,13 +43,13 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-[#A1A1AA] uppercase tracking-wider mb-2">
-              Location / Address *
+              Address *
             </label>
             <input
               type="text"
               required
-              value={branchForm.location}
-              onChange={(e) => setBranchForm({ ...branchForm, location: e.target.value })}
+              value={branchForm.address}
+              onChange={(e) => setBranchForm({ ...branchForm, address: e.target.value })}
               placeholder="e.g. Mirpur, Dhaka"
               className="w-full bg-[#0D0B0A] border border-[#27272A] rounded-lg px-3 py-2 text-xs text-[#F2F2F2] outline-none focus:border-[#22C55E] transition"
             />

@@ -13,12 +13,17 @@ export default function AuditLogsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
       const params: Record<string, string> = { search, limit: "100" };
       if (entityFilter) params.entityType = entityFilter;
       const res = await getAuditLogs(params);
       setLogs(res?.data || []);
-    } catch {
-      setToast({ msg: "Failed to load audit logs", type: "error" });
+    } catch (error: any) {
+      if (error?.response?.status !== 401 && error?.response?.status !== 403) {
+        setToast({ msg: "Failed to load audit logs", type: "error" });
+      }
     } finally {
       setLoading(false);
     }

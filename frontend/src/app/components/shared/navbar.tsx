@@ -9,6 +9,12 @@ type NavItem = {
   items?: string[];
 };
 
+type UserProfile = {
+  name?: string;
+  email?: string;
+  role?: string;
+};
+
 const desktopMenu: NavItem[] = [
   { label: "Home", href: "#home" },
   {
@@ -36,14 +42,8 @@ const desktopMenu: NavItem[] = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    if (typeof document !== "undefined") {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    }
-  }, []);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isDark, setIsDark] = useState(false);
 
   const toggleTheme = () => {
     setIsDark((prev) => {
@@ -60,19 +60,32 @@ export default function Navbar() {
   };
 
   useEffect(() => {
+    const initializeTheme = () => {
+      const storedTheme = window.localStorage.getItem("theme");
+      const shouldUseDark = storedTheme === "dark" || (!storedTheme && document.documentElement.classList.contains("dark"));
+
+      setIsDark(shouldUseDark);
+      if (shouldUseDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    };
+
     const checkUser = () => {
       const userData = localStorage.getItem("user");
       if (userData) {
         try {
-          setUser(JSON.parse(userData));
-        } catch (e) {
+          setUser(JSON.parse(userData) as UserProfile);
+        } catch {
           setUser(null);
         }
       } else {
         setUser(null);
       }
     };
-    
+
+    initializeTheme();
     checkUser();
     window.addEventListener("storage", checkUser);
     return () => window.removeEventListener("storage", checkUser);
