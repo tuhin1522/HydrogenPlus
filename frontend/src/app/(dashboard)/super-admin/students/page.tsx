@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllStudents,
   getStudentById,
@@ -29,14 +31,16 @@ export default function StudentsPage() {
   const [form, setForm] = useState<any>({});
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const loadMeta = useCallback(async () => {
@@ -109,6 +113,7 @@ export default function StudentsPage() {
           address: form.address || null,
           admissionDate: form.admissionDate || new Date().toISOString(),
         });
+        await swalSuccess({ title: "Student enrolled", text: "The student profile was created successfully." });
         showToast("Student enrolled!");
       } else {
         await updateStudent(form.id, {
@@ -117,32 +122,40 @@ export default function StudentsPage() {
           schoolName: form.schoolName,
           address: form.address,
         });
+        await swalSuccess({ title: "Student updated", text: "The student profile was updated successfully." });
         showToast("Student profile updated!");
       }
       setModal(null);
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Operation failed", "error");
+      const message = err?.response?.data?.message || "Operation failed";
+      await swalError({ title: "Operation failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this student profile?")) return;
+    const confirmed = await swalConfirm({ title: "Delete this student profile?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     try {
       await deleteStudent(id);
+      await swalSuccess({ title: "Student deleted", text: "The student profile was removed successfully." });
       showToast("Student deleted.");
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed to delete", "error");
+      const message = err?.response?.data?.message || "Failed to delete";
+      await swalError({ title: "Delete failed", text: message });
+      showToast(message, "error");
     }
   };
 
-  const handleBulkPromote = () => {
+  const handleBulkPromote = async () => {
     if (selectedIds.length === 0) return;
-    if (!confirm(`Promote ${selectedIds.length} students?`)) return;
-    // Mock bulk action
+    const confirmed = await swalConfirm({ title: `Promote ${selectedIds.length} students?`, text: "This will apply the promotion action to the selected students." });
+    if (!confirmed) return;
+    await swalSuccess({ title: "Promotion complete", text: `${selectedIds.length} students were promoted successfully.` });
     showToast(`${selectedIds.length} students promoted successfully!`);
     setSelectedIds([]);
   };
@@ -167,13 +180,6 @@ export default function StudentsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Toast */}
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllSettings,
   upsertSetting,
@@ -13,11 +15,13 @@ export default function SettingsPage() {
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ key: "", value: "", description: "" });
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const load = useCallback(async () => {
@@ -44,35 +48,35 @@ export default function SettingsPage() {
     setSubmitting(true);
     try {
       await upsertSetting(form);
+      await swalSuccess({ title: "Setting saved", text: "The configuration was saved successfully." });
       showToast("Setting saved!");
       setModal(false);
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed to save", "error");
+      const message = err?.response?.data?.message || "Failed to save";
+      await swalError({ title: "Save failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (key: string) => {
-    if (!confirm(`Delete setting "${key}"?`)) return;
+    const confirmed = await swalConfirm({ title: `Delete setting "${key}"?`, text: "This action cannot be undone." });
+    if (!confirmed) return;
     try {
       await deleteSetting(key);
+      await swalSuccess({ title: "Setting deleted", text: "The setting was removed successfully." });
       showToast("Setting deleted.");
       load();
     } catch {
+      await swalError({ title: "Delete failed", text: "Failed to delete this setting." });
       showToast("Failed to delete", "error");
     }
   };
 
   return (
     <div className="p-6 space-y-6">
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#F2F2F2]">System Settings</h1>

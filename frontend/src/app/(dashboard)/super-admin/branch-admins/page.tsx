@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllBranchAdmins,
   getAllBranches,
@@ -20,11 +22,13 @@ export default function BranchAdminsPage() {
   const [form, setForm] = useState<CreateBranchAdminPayload>({ userId: "", branchId: "", designation: "", joiningDate: "" });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const load = useCallback(async () => {
@@ -74,39 +78,41 @@ export default function BranchAdminsPage() {
       };
       if (modal === "edit" && editingId) {
         await updateBranchAdmin(editingId, payload);
+        await swalSuccess({ title: "Branch admin updated", text: "The branch admin details were updated successfully." });
         showToast("Branch admin updated!");
       } else {
         await createBranchAdmin(payload);
+        await swalSuccess({ title: "Branch admin assigned", text: "The branch admin role was assigned successfully." });
         showToast("Branch admin assigned!");
       }
       setModal(null);
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Operation failed", "error");
+      const message = err?.response?.data?.message || "Operation failed";
+      await swalError({ title: "Operation failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Remove this branch admin role? The user will revert to Teacher role.")) return;
+    const confirmed = await swalConfirm({ title: "Remove this branch admin role?", text: "The user will revert to the teacher role." });
+    if (!confirmed) return;
     try {
       await deleteBranchAdmin(id);
+      await swalSuccess({ title: "Branch admin removed", text: "The role was removed successfully." });
       showToast("Branch admin removed.");
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed", "error");
+      const message = err?.response?.data?.message || "Failed";
+      await swalError({ title: "Delete failed", text: message });
+      showToast(message, "error");
     }
   };
 
   return (
     <div className="p-6 space-y-6">
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#F2F2F2]">Branch Admin Management</h1>

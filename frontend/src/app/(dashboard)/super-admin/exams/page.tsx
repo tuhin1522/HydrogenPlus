@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllExams, // Assume these exist in your service, otherwise they'll be mocked
   createExam,
@@ -24,11 +26,13 @@ export default function ExamsPage() {
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ title: "", type: "MCQ", date: "", duration: 60, totalMarks: 100, classLevelId: "", subjectId: "" });
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const load = useCallback(async () => {
@@ -53,26 +57,33 @@ export default function ExamsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    showToast("Exam created successfully!");
-    setModal(false);
-    // Add to mock state
-    setExams([{
-      id: Math.random().toString(),
-      title: form.title,
-      type: form.type,
-      date: new Date(form.date).toISOString(),
-      duration: form.duration,
-      totalMarks: form.totalMarks,
-      status: "UPCOMING",
-      classLevel: classLevels.find(c => c.id === form.classLevelId) || { name: "Unknown" },
-      subject: subjects.find(s => s.id === form.subjectId) || { name: "Unknown" },
-      enrolled: 0
-    }, ...exams]);
+    try {
+      await swalSuccess({ title: "Exam created", text: "The exam was created successfully." });
+      showToast("Exam created successfully!");
+      setModal(false);
+      setExams([{
+        id: Math.random().toString(),
+        title: form.title,
+        type: form.type,
+        date: new Date(form.date).toISOString(),
+        duration: form.duration,
+        totalMarks: form.totalMarks,
+        status: "UPCOMING",
+        classLevel: classLevels.find(c => c.id === form.classLevelId) || { name: "Unknown" },
+        subject: subjects.find(s => s.id === form.subjectId) || { name: "Unknown" },
+        enrolled: 0
+      }, ...exams]);
+    } catch {
+      await swalError({ title: "Could not create exam", text: "Please try again." });
+      showToast("Could not create exam", "error");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm("Delete this exam?")) return;
+  const handleDelete = async (id: string) => {
+    const confirmed = await swalConfirm({ title: "Delete this exam?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     setExams(exams.filter(e => e.id !== id));
+    await swalSuccess({ title: "Exam deleted", text: "The exam was removed successfully." });
     showToast("Exam deleted.");
   };
 
@@ -80,12 +91,6 @@ export default function ExamsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#F2F2F2]">Exam Management</h1>

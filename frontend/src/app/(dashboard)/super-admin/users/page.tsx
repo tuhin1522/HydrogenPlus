@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllUsers,
   createUser,
@@ -20,11 +22,13 @@ export default function UsersPage() {
   const [form, setForm] = useState<any>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const load = useCallback(async () => {
@@ -64,49 +68,56 @@ export default function UsersPage() {
     try {
       if (modal === "edit" && editingId) {
         await updateUser(editingId, { name: form.name, email: form.email, phone: form.phone, role: form.role, isActive: form.isActive });
+        await swalSuccess({ title: "User updated", text: "The user account was updated successfully." });
         showToast("User updated!");
       } else {
         await createUser(form);
+        await swalSuccess({ title: "User created", text: "The user account was created successfully." });
         showToast("User created!");
       }
       setModal(null);
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Operation failed", "error");
+      const message = err?.response?.data?.message || "Operation failed";
+      await swalError({ title: "Operation failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const toggleStatus = async (user: any) => {
+    const confirmed = await swalConfirm({ title: `${user.isActive ? "Deactivate" : "Activate"} this user?`, text: `This will change the account status for ${user.name || "this user"}.` });
+    if (!confirmed) return;
     try {
       await updateUserStatus(user.id, !user.isActive);
+      await swalSuccess({ title: "Status updated", text: `User ${user.isActive ? "deactivated" : "activated"}.` });
       showToast(`User ${user.isActive ? "deactivated" : "activated"}.`);
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed to update status", "error");
+      const message = err?.response?.data?.message || "Failed to update status";
+      await swalError({ title: "Status update failed", text: message });
+      showToast(message, "error");
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this user permanently?")) return;
+    const confirmed = await swalConfirm({ title: "Delete this user permanently?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     try {
       await deleteUser(id);
+      await swalSuccess({ title: "User deleted", text: "The user account was removed successfully." });
       showToast("User deleted.");
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed to delete", "error");
+      const message = err?.response?.data?.message || "Failed to delete";
+      await swalError({ title: "Delete failed", text: message });
+      showToast(message, "error");
     }
   };
 
   return (
     <div className="p-6 space-y-6">
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#F2F2F2]">User Management</h1>
