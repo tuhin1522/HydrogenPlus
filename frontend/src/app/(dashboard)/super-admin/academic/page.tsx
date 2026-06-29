@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllClassLevels,
   createClassLevel,
@@ -20,14 +22,9 @@ import {
   createBatchSubject,
   updateBatchSubject,
   deleteBatchSubject,
-  getAllRoutines,
-  createRoutine,
-  deleteRoutine,
 } from "@/app/modules/super-admin/services/super-admin.service";
 
-type Tab = "classes" | "subjects" | "batches" | "batch-subjects" | "routines";
-
-const DAYS = ["SATURDAY", "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
+type Tab = "classes" | "subjects" | "batches" | "batch-subjects";
 
 export default function AcademicManagementPage() {
   const [activeTab, setActiveTab] = useState<Tab>("classes");
@@ -37,17 +34,18 @@ export default function AcademicManagementPage() {
   const [teachers, setTeachers] = useState<any[]>([]);
   const [batches, setBatches] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
-  const [batchSubjects, setBatchSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<"create" | "edit" | null>(null);
   const [form, setForm] = useState<any>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const loadMeta = useCallback(async () => {
@@ -64,7 +62,6 @@ export default function AcademicManagementPage() {
     if (tRes.status === "fulfilled") setTeachers(tRes.value?.data || []);
     if (batchRes.status === "fulfilled") setBatches(batchRes.value?.data || []);
     if (subRes.status === "fulfilled") setSubjects(subRes.value?.data || []);
-    if (bsRes.status === "fulfilled") setBatchSubjects(bsRes.value?.data || []);
   }, []);
 
   const loadData = useCallback(async () => {
@@ -82,25 +79,13 @@ export default function AcademicManagementPage() {
       } else if (activeTab === "batch-subjects") {
         const res = await getAllBatchSubjects({ limit: 100 });
         setData(res?.data || []);
-      } else if (activeTab === "routines") {
-        const res = await getAllRoutines({ limit: 100 });
-        setData(res?.data || []);
-      }
+      } 
     } catch {
       showToast("Failed to load data", "error");
     } finally {
       setLoading(false);
     }
   }, [activeTab]);
-
-  useEffect(() => { loadMeta(); }, [loadMeta]);
-  useEffect(() => { loadData(); }, [loadData]);
-
-  const openCreate = () => {
-    setForm(activeTab === "routines" ? { dayOfWeek: "SATURDAY", room: "" } : {});
-    setEditingId(null);
-    setModal("create");
-  };
 
   const openEdit = (item: any) => {
     setForm({ ...item });
@@ -127,42 +112,36 @@ export default function AcademicManagementPage() {
         const payload = { batchId: form.batchId, subjectId: form.subjectId, teacherId: form.teacherId };
         if (modal === "edit") await updateBatchSubject(editingId!, { teacherId: form.teacherId });
         else await createBatchSubject(payload);
-      } else if (activeTab === "routines") {
-        const start = new Date(`${new Date().toISOString().slice(0, 10)}T${form.startTime || "09:00"}:00`);
-        const end = new Date(`${new Date().toISOString().slice(0, 10)}T${form.endTime || "10:00"}:00`);
-        await createRoutine({
-          branchId: form.branchId,
-          batchId: form.batchId,
-          batchSubjectId: form.batchSubjectId,
-          room: form.room,
-          dayOfWeek: form.dayOfWeek,
-          startTime: start.toISOString(),
-          endTime: end.toISOString(),
-        });
-      }
+      } 
+      await swalSuccess({ title: "Saved successfully", text: "The changes were applied successfully." });
       showToast("Saved successfully!");
       setModal(null);
       loadData();
       loadMeta();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Operation failed", "error");
+      const message = err?.response?.data?.message || "Operation failed";
+      await swalError({ title: "Operation failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
+    const confirmed = await swalConfirm({ title: "Delete this item?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     try {
       if (activeTab === "classes") await deleteClassLevel(id);
       else if (activeTab === "subjects") await deleteSubject(id);
       else if (activeTab === "batches") await deleteBatch(id);
       else if (activeTab === "batch-subjects") await deleteBatchSubject(id);
-      else if (activeTab === "routines") await deleteRoutine(id);
+      await swalSuccess({ title: "Deleted successfully", text: "The item was removed successfully." });
       showToast("Deleted successfully.");
       loadData();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed to delete", "error");
+      const message = err?.response?.data?.message || "Failed to delete";
+      await swalError({ title: "Delete failed", text: message });
+      showToast(message, "error");
     }
   };
 
@@ -171,25 +150,15 @@ export default function AcademicManagementPage() {
     subjects: "Subjects",
     batches: "Batches",
     "batch-subjects": "Batch Subjects",
-    routines: "Routines",
   };
 
   return (
     <div className="p-6 space-y-6">
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#F2F2F2]">Academic Management</h1>
-          <p className="text-sm text-[#71717A] mt-1">Manage classes, subjects, batches, assignments, and routines</p>
+          <p className="text-sm text-[#71717A] mt-1">Manage classes, subjects, batches, and assignments</p>
         </div>
-        <button onClick={openCreate} className="px-4 py-2 bg-[#22C55E] text-[#052E16] text-sm font-bold rounded-lg hover:bg-[#16A34A] transition">
-          + Create {tabLabels[activeTab]}
-        </button>
       </div>
 
       <div className="flex border-b border-[#1C1917] overflow-x-auto">
@@ -209,7 +178,6 @@ export default function AcademicManagementPage() {
               {activeTab === "subjects" && <><th className="px-5 py-3 text-left font-medium uppercase">Name</th><th className="px-5 py-3 text-left font-medium uppercase">Code</th><th className="px-5 py-3 text-left font-medium uppercase">Class</th><th className="px-5 py-3 text-right font-medium uppercase">Actions</th></>}
               {activeTab === "batches" && <><th className="px-5 py-3 text-left font-medium uppercase">Name</th><th className="px-5 py-3 text-left font-medium uppercase">Branch</th><th className="px-5 py-3 text-left font-medium uppercase">Capacity</th><th className="px-5 py-3 text-left font-medium uppercase">Status</th><th className="px-5 py-3 text-right font-medium uppercase">Actions</th></>}
               {activeTab === "batch-subjects" && <><th className="px-5 py-3 text-left font-medium uppercase">Batch</th><th className="px-5 py-3 text-left font-medium uppercase">Subject</th><th className="px-5 py-3 text-left font-medium uppercase">Teacher</th><th className="px-5 py-3 text-right font-medium uppercase">Actions</th></>}
-              {activeTab === "routines" && <><th className="px-5 py-3 text-left font-medium uppercase">Day</th><th className="px-5 py-3 text-left font-medium uppercase">Room</th><th className="px-5 py-3 text-left font-medium uppercase">Batch</th><th className="px-5 py-3 text-right font-medium uppercase">Actions</th></>}
             </tr>
           </thead>
           <tbody className="divide-y divide-[#1C1917]">
@@ -226,7 +194,6 @@ export default function AcademicManagementPage() {
                   {activeTab === "subjects" && <><td className="px-5 py-4 text-[#F2F2F2]">{item.name}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.code || "—"}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.classLevel?.name || "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
                   {activeTab === "batches" && <><td className="px-5 py-4 text-[#F2F2F2]">{item.name}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.branch?.name || "—"}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.capacity}</td><td className="px-5 py-4"><StatusBadge status={item.status} /></td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
                   {activeTab === "batch-subjects" && <><td className="px-5 py-4 text-[#F2F2F2]">{item.batch?.name || "—"}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.subject?.name || "—"}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.teacher?.user?.name || "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
-                  {activeTab === "routines" && <><td className="px-5 py-4 text-[#F2F2F2]">{item.dayOfWeek}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.room}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.batch?.name || "—"}</td><td className="px-5 py-4 text-right"><button onClick={() => handleDelete(item.id)} className="px-3 py-1 text-xs border border-[#27272A] text-[#A1A1AA] rounded-lg hover:text-[#EF4444]">Delete</button></td></>}
                 </tr>
               ))
             )}
@@ -270,17 +237,6 @@ export default function AcademicManagementPage() {
                     </>
                   )}
                   <SelectField label="Teacher" required value={form.teacherId || ""} onChange={(v) => setForm({ ...form, teacherId: v })} options={teachers.map((t) => ({ value: t.id, label: t.user?.name || t.id }))} />
-                </>
-              )}
-              {activeTab === "routines" && (
-                <>
-                  <SelectField label="Branch" required value={form.branchId || ""} onChange={(v) => setForm({ ...form, branchId: v })} options={branches.map((b) => ({ value: b.id, label: b.name }))} />
-                  <SelectField label="Batch" required value={form.batchId || ""} onChange={(v) => setForm({ ...form, batchId: v })} options={batches.map((b) => ({ value: b.id, label: b.name }))} />
-                  <SelectField label="Batch Subject" required value={form.batchSubjectId || ""} onChange={(v) => setForm({ ...form, batchSubjectId: v })} options={batchSubjects.map((bs) => ({ value: bs.id, label: `${bs.batch?.name || "Batch"} - ${bs.subject?.name || "Subject"}` }))} />
-                  <SelectField label="Day" required value={form.dayOfWeek || "SATURDAY"} onChange={(v) => setForm({ ...form, dayOfWeek: v })} options={DAYS.map((d) => ({ value: d, label: d }))} />
-                  <Field label="Room" required value={form.room || ""} onChange={(v) => setForm({ ...form, room: v })} />
-                  <Field label="Start Time" required type="time" value={form.startTime || "09:00"} onChange={(v) => setForm({ ...form, startTime: v })} />
-                  <Field label="End Time" required type="time" value={form.endTime || "10:00"} onChange={(v) => setForm({ ...form, endTime: v })} />
                 </>
               )}
               <div className="flex justify-end gap-3 pt-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { getAuditLogs } from "@/app/modules/super-admin/services/super-admin.service";
 
 export default function AuditLogsPage() {
@@ -8,7 +9,6 @@ export default function AuditLogsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [entityFilter, setEntityFilter] = useState("");
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -22,7 +22,7 @@ export default function AuditLogsPage() {
       setLogs(res?.data || []);
     } catch (error: any) {
       if (error?.response?.status !== 401 && error?.response?.status !== 403) {
-        setToast({ msg: "Failed to load audit logs", type: "error" });
+        toast.error("Failed to load audit logs");
       }
     } finally {
       setLoading(false);
@@ -36,12 +36,6 @@ export default function AuditLogsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       <div>
         <h1 className="text-2xl font-bold text-[#F2F2F2]">Audit Logs</h1>
         <p className="text-sm text-[#71717A] mt-1">Track system-wide administrative actions</p>

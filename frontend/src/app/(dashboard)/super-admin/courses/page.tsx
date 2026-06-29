@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllCourses,
   createCourse,
@@ -63,11 +65,13 @@ export default function CoursesPage() {
   const [form, setForm] = useState<CreateCoursePayload>(EMPTY);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const load = useCallback(async () => {
@@ -117,15 +121,18 @@ export default function CoursesPage() {
       const payload = { ...form, price: Number(form.price) };
       if (modal === "edit" && editingId) {
         await updateCourse(editingId, payload);
+        await swalSuccess({ title: "Course updated", text: "The course details were updated successfully." });
         showToast("Course updated!");
       } else {
         await createCourse(payload);
+        await swalSuccess({ title: "Course created", text: "The course was created successfully." });
         showToast("Course created!");
       }
       setModal(null);
       load();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Operation failed";
+      await swalError({ title: "Operation failed", text: message });
       showToast(message, "error");
     } finally {
       setSubmitting(false);
@@ -133,37 +140,37 @@ export default function CoursesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this course?")) return;
+    const confirmed = await swalConfirm({ title: "Delete this course?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     try {
       await deleteCourse(id);
+      await swalSuccess({ title: "Course deleted", text: "The course was removed successfully." });
       showToast("Course deleted.");
       load();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to delete";
+      await swalError({ title: "Delete failed", text: message });
       showToast(message, "error");
     }
   };
 
   const handleArchive = async (id: string) => {
+    const confirmed = await swalConfirm({ title: "Archive this course?", text: "You can restore it later if needed." });
+    if (!confirmed) return;
     try {
       await updateCourse(id, { status: "ARCHIVED" });
+      await swalSuccess({ title: "Course archived", text: "The course is now archived." });
       showToast("Course archived.");
       load();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to archive";
+      await swalError({ title: "Archive failed", text: message });
       showToast(message, "error");
     }
   };
 
   return (
     <div className="p-6 space-y-6">
-      {/* Toast */}
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>

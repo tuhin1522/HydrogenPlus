@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllTeachers,
   getTeacherById,
@@ -26,11 +28,13 @@ export default function TeachersPage() {
   const [form, setForm] = useState<any>({});
   const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const load = useCallback(async () => {
@@ -97,6 +101,7 @@ export default function TeachersPage() {
           specialization: form.specialization || null,
           bio: form.bio || null,
         });
+        await swalSuccess({ title: "Teacher created", text: "The teacher account was created successfully." });
         showToast("Teacher created!");
       } else {
         await updateTeacher(form.id, {
@@ -106,29 +111,39 @@ export default function TeachersPage() {
           specialization: form.specialization || null,
           bio: form.bio || null,
         });
+        await swalSuccess({ title: "Teacher updated", text: "The teacher profile was updated successfully." });
         showToast("Teacher profile updated!");
       }
       setModal(null);
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Operation failed", "error");
+      const message = err?.response?.data?.message || "Operation failed";
+      await swalError({ title: "Operation failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this teacher profile?")) return;
+    const confirmed = await swalConfirm({ title: "Delete this teacher profile?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     try {
       await deleteTeacher(id);
+      await swalSuccess({ title: "Teacher deleted", text: "The teacher profile was removed successfully." });
       showToast("Teacher deleted.");
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed to delete", "error");
+      const message = err?.response?.data?.message || "Failed to delete";
+      await swalError({ title: "Delete failed", text: message });
+      showToast(message, "error");
     }
   };
 
-  const handleDeactivate = (teacher: any) => {
+  const handleDeactivate = async (teacher: any) => {
+    const confirmed = await swalConfirm({ title: "Deactivate teacher?", text: `${teacher.user?.name || "This teacher"} will be marked inactive.` });
+    if (!confirmed) return;
+    await swalSuccess({ title: "Teacher deactivated", text: `${teacher.user?.name || "Teacher"} was marked inactive.` });
     showToast(`${teacher.user?.name} has been deactivated (mock action).`, "success");
   };
 
@@ -142,7 +157,7 @@ export default function TeachersPage() {
       .filter(bs => bs.teacherId === teacherId)
       .map(bs => bs.subject?.name)
       .filter(Boolean);
-    return [...new Set(subjects)];
+    return subjects.filter((value, index, self) => self.indexOf(value) === index);
   };
 
   const filteredTeachers = teachers.filter(t => {
@@ -153,13 +168,6 @@ export default function TeachersPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Toast */}
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg transition-all ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

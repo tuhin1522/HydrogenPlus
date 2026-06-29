@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { SonnerGlobal } from "./components/modern-ui/sonner";
 import "./styles/globals.css";
 
 const inter = Inter({
@@ -23,7 +24,10 @@ export default function RootLayout({
       className={`${inter.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">{children}</body>
+      <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">
+        {children}
+        <SonnerGlobal position="top-right" richColors closeButton />
+      </body>
     </html>
   );
 }

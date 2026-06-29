@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllBatchSubjects,
   getAllBranches,
@@ -34,12 +36,14 @@ export default function RoutinePage() {
   const [form, setForm] = useState<any>({ dayOfWeek: "SATURDAY", room: "", startTime: "09:00", endTime: "10:00", branchId: "", batchId: "", batchSubjectId: "" });
   const [submitting, setSubmitting] = useState(false);
   const [conflicts, setConflicts] = useState<string[]>([]);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const load = useCallback(async () => {
@@ -81,12 +85,15 @@ export default function RoutinePage() {
       if (form.room && r.room === form.room)
         detected.push(`⚠️ Room conflict: Room "${form.room}" is already booked.`);
     });
-    setConflicts([...new Set(detected)]);
+    setConflicts(detected.filter((value, index, self) => self.indexOf(value) === index));
   }, [form, routines, batchSubjects]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (conflicts.length > 0 && !confirm(`${conflicts.length} conflict(s) detected. Add anyway?`)) return;
+    if (conflicts.length > 0) {
+      const confirmed = await swalConfirm({ title: "Conflicts detected", text: `${conflicts.length} conflict(s) detected. Add anyway?` });
+      if (!confirmed) return;
+    }
     setSubmitting(true);
     try {
       const today = new Date().toISOString().slice(0, 10);
@@ -96,17 +103,21 @@ export default function RoutinePage() {
         startTime: new Date(`${today}T${form.startTime}:00`).toISOString(),
         endTime: new Date(`${today}T${form.endTime}:00`).toISOString(),
       });
+      await swalSuccess({ title: "Routine updated", text: "The class was added to the routine successfully." });
       showToast("Class added to routine!");
       setModal(false); setConflicts([]); load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed to create", "error");
+      const message = err?.response?.data?.message || "Failed to create";
+      await swalError({ title: "Could not add class", text: message });
+      showToast(message, "error");
     } finally { setSubmitting(false); }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Remove this class?")) return;
-    try { await deleteRoutine(id); showToast("Removed."); load(); }
-    catch { showToast("Failed", "error"); }
+    const confirmed = await swalConfirm({ title: "Remove this class?", text: "This will delete the class from the routine." });
+    if (!confirmed) return;
+    try { await deleteRoutine(id); await swalSuccess({ title: "Class removed", text: "The class was removed from the routine." }); showToast("Removed."); load(); }
+    catch (err: any) { const message = err?.response?.data?.message || "Failed"; await swalError({ title: "Delete failed", text: message }); showToast(message, "error"); }
   };
 
   const filteredRoutines = routines.filter((r: any) => {
@@ -124,12 +135,6 @@ export default function RoutinePage() {
 
   return (
     <div className="p-6 space-y-6">
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#F2F2F2]">Weekly Class Routine</h1>

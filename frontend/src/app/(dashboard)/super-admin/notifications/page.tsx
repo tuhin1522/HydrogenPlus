@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllNotifications,
   createNotification,
@@ -15,11 +17,13 @@ export default function NotificationsPage() {
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ title: "", message: "", type: "INFO", userId: "" });
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const load = useCallback(async () => {
@@ -54,12 +58,15 @@ export default function NotificationsPage() {
         type: form.type,
         ...(form.userId ? { userId: form.userId } : {}),
       });
+      await swalSuccess({ title: "Notification sent", text: "The notification was created successfully." });
       showToast("Notification created!");
       setModal(false);
       setForm({ title: "", message: "", type: "INFO", userId: "" });
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed to create", "error");
+      const message = err?.response?.data?.message || "Failed to create";
+      await swalError({ title: "Notification failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
@@ -70,29 +77,27 @@ export default function NotificationsPage() {
       await markNotificationRead(id);
       load();
     } catch {
+      await swalError({ title: "Could not update", text: "Failed to mark as read." });
       showToast("Failed to mark as read", "error");
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this notification?")) return;
+    const confirmed = await swalConfirm({ title: "Delete this notification?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     try {
       await deleteNotification(id);
+      await swalSuccess({ title: "Notification deleted", text: "The notification was removed successfully." });
       showToast("Notification deleted.");
       load();
     } catch {
+      await swalError({ title: "Delete failed", text: "Failed to delete this notification." });
       showToast("Failed to delete", "error");
     }
   };
 
   return (
     <div className="p-6 space-y-6">
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#F2F2F2]">Notifications</h1>

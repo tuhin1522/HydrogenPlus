@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import {
   getAllBranches,
   createBranch,
@@ -29,11 +31,13 @@ export default function BranchesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === "error") {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   const load = useCallback(async () => {
@@ -77,29 +81,37 @@ export default function BranchesPage() {
     try {
       if (modal === "edit" && editingId) {
         await updateBranch(editingId, form);
+        await swalSuccess({ title: "Branch updated", text: "The branch details were updated successfully." });
         showToast("Branch updated!");
       } else {
         await createBranch(form);
+        await swalSuccess({ title: "Branch created", text: "The new branch was created successfully." });
         showToast("Branch created!");
       }
       setModal(null);
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Operation failed", "error");
+      const message = err?.response?.data?.message || "Operation failed";
+      await swalError({ title: "Operation failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this branch? This cannot be undone.")) return;
+    const confirmed = await swalConfirm({ title: "Delete branch?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     setDeletingId(id);
     try {
       await deleteBranch(id);
+      await swalSuccess({ title: "Branch deleted", text: "The branch was removed successfully." });
       showToast("Branch deleted.");
       load();
     } catch (err: any) {
-      showToast(err?.response?.data?.message || "Failed to delete", "error");
+      const message = err?.response?.data?.message || "Failed to delete";
+      await swalError({ title: "Delete failed", text: message });
+      showToast(message, "error");
     } finally {
       setDeletingId(null);
     }
@@ -110,13 +122,6 @@ export default function BranchesPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Toast */}
-      {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]" : "bg-[#EF4444]/10 border-[#EF4444]/30 text-[#EF4444]"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
@@ -371,7 +376,7 @@ export default function BranchesPage() {
                 { label: "Manager Name *", key: "managerName", placeholder: "Manager's full name", required: true },
                 { label: "Address *", key: "address", placeholder: "Full address", required: true },
                 { label: "Phone *", key: "phone", placeholder: "e.g. 01700000000", required: true },
-                { label: "Email", key: "email", placeholder: "branch@example.com" },
+                { label: "Email", key: "email", placeholder: "branch@gmail.com" },
               ].map(({ label, key, placeholder, required }) => (
                 <div key={key}>
                   <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">{label}</label>
