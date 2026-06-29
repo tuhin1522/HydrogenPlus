@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { SuperAdminUser } from "@/app/modules/super-admin/types";
 
 const MENU_ITEMS = [
   { id: "overview", label: "Overview", icon: "📊", path: "/super-admin/overview" },
@@ -21,12 +22,6 @@ const MENU_ITEMS = [
   { id: "audit-logs", label: "Audit Logs", icon: "📋", path: "/super-admin/audit-logs" },
   { id: "settings", label: "Settings", icon: "⚙️", path: "/super-admin/settings" },
 ];
-
-interface SuperAdminUser {
-  name?: string;
-  email?: string;
-  role?: string;
-}
 
 export default function SuperAdminLayout({
   children,

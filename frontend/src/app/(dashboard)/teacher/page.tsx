@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { TeacherUser } from "@/app/modules/super-admin/types";
 
-type TeacherUser = {
-  name?: string;
-  email?: string;
-  role?: string;
-};
+
 
 export default function TeacherDashboard() {
   const router = useRouter();
