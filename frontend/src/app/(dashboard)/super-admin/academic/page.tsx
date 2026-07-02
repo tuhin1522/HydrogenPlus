@@ -26,17 +26,46 @@ import {
 
 type Tab = "classes" | "subjects" | "batches" | "batch-subjects";
 
+type AcademicRecord = {
+  id: string;
+  name?: string | null;
+  code?: string | null;
+  classLevel?: { name?: string | null } | null;
+  branch?: { name?: string | null } | null;
+  capacity?: number | null;
+  status?: string | null;
+  batch?: { name?: string | null } | null;
+  subject?: { name?: string | null } | null;
+  teacher?: { user?: { name?: string | null } | null } | null;
+};
+
+type BranchOption = { id: string; name?: string | null };
+
+type ClassLevelOption = { id: string; name?: string | null };
+
+type TeacherOption = { id: string; user?: { name?: string | null } | null };
+
+type AcademicForm = Record<string, string>;
+
+type ApiError = {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
 export default function AcademicManagementPage() {
   const [activeTab, setActiveTab] = useState<Tab>("classes");
-  const [data, setData] = useState<any[]>([]);
-  const [branches, setBranches] = useState<any[]>([]);
-  const [classLevels, setClassLevels] = useState<any[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [batches, setBatches] = useState<any[]>([]);
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [data, setData] = useState<AcademicRecord[]>([]);
+  const [branches, setBranches] = useState<BranchOption[]>([]);
+  const [classLevels, setClassLevels] = useState<ClassLevelOption[]>([]);
+  const [teachers, setTeachers] = useState<TeacherOption[]>([]);
+  const [batches, setBatches] = useState<AcademicRecord[]>([]);
+  const [subjects, setSubjects] = useState<AcademicRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<"create" | "edit" | null>(null);
-  const [form, setForm] = useState<any>({});
+  const [form, setForm] = useState<AcademicForm>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -49,7 +78,7 @@ export default function AcademicManagementPage() {
   };
 
   const loadMeta = useCallback(async () => {
-    const [bRes, lRes, tRes, batchRes, subRes, bsRes] = await Promise.allSettled([
+    const [bRes, lRes, tRes, batchRes, subRes] = await Promise.allSettled([
       getAllBranches({ limit: 100 }),
       getAllClassLevels({ limit: 100 }),
       getAllTeachers({ limit: 100 }),
@@ -88,15 +117,41 @@ export default function AcademicManagementPage() {
   }, [activeTab]);
 
   useEffect(() => {
-    loadMeta();
+    let isMounted = true;
+
+    const run = async () => {
+      if (!isMounted) return;
+      await loadMeta();
+    };
+
+    void run();
+
+    return () => {
+      isMounted = false;
+    };
   }, [loadMeta]);
 
   useEffect(() => {
-    loadData();
+    let isMounted = true;
+
+    const run = async () => {
+      if (!isMounted) return;
+      await loadData();
+    };
+
+    void run();
+
+    return () => {
+      isMounted = false;
+    };
   }, [loadData]);
 
-  const openEdit = (item: any) => {
-    setForm({ ...item });
+  const openEdit = (item: AcademicRecord) => {
+    const normalized = Object.fromEntries(
+      Object.entries(item).map(([key, value]) => [key, value == null ? "" : String(value)])
+    ) as AcademicForm;
+
+    setForm(normalized);
     setEditingId(item.id);
     setModal("edit");
   };
@@ -106,28 +161,28 @@ export default function AcademicManagementPage() {
     setSubmitting(true);
     try {
       if (activeTab === "classes") {
-        if (modal === "edit") await updateClassLevel(editingId!, { name: form.name });
-        else await createClassLevel({ name: form.name });
+        if (modal === "edit") await updateClassLevel(editingId!, { name: String(form.name ?? "") });
+        else await createClassLevel({ name: String(form.name ?? "") });
       } else if (activeTab === "subjects") {
-        const payload = { name: form.name, code: form.code, classLevelId: form.classLevelId };
+        const payload = { name: String(form.name ?? ""), code: String(form.code ?? ""), classLevelId: String(form.classLevelId ?? "") };
         if (modal === "edit") await updateSubject(editingId!, payload);
         else await createSubject(payload);
       } else if (activeTab === "batches") {
-        const payload = { name: form.name, capacity: Number(form.capacity), status: form.status || "ACTIVE", branchId: form.branchId, classLevelId: form.classLevelId };
+        const payload = { name: String(form.name ?? ""), capacity: Number(form.capacity ?? 0), status: String(form.status ?? "ACTIVE"), branchId: String(form.branchId ?? ""), classLevelId: String(form.classLevelId ?? "") };
         if (modal === "edit") await updateBatch(editingId!, payload);
         else await createBatch(payload);
       } else if (activeTab === "batch-subjects") {
-        const payload = { batchId: form.batchId, subjectId: form.subjectId, teacherId: form.teacherId };
-        if (modal === "edit") await updateBatchSubject(editingId!, { teacherId: form.teacherId });
+        const payload = { batchId: String(form.batchId ?? ""), subjectId: String(form.subjectId ?? ""), teacherId: String(form.teacherId ?? "") };
+        if (modal === "edit") await updateBatchSubject(editingId!, { teacherId: String(form.teacherId ?? "") });
         else await createBatchSubject(payload);
       } 
       await swalSuccess({ title: "Saved successfully", text: "The changes were applied successfully." });
       showToast("Saved successfully!");
       setModal(null);
-      loadData();
-      loadMeta();
-    } catch (err: any) {
-      const message = err?.response?.data?.message || "Operation failed";
+      void loadData();
+      void loadMeta();
+    } catch (err: unknown) {
+      const message = (err as ApiError)?.response?.data?.message || "Operation failed";
       await swalError({ title: "Operation failed", text: message });
       showToast(message, "error");
     } finally {
@@ -145,9 +200,9 @@ export default function AcademicManagementPage() {
       else if (activeTab === "batch-subjects") await deleteBatchSubject(id);
       await swalSuccess({ title: "Deleted successfully", text: "The item was removed successfully." });
       showToast("Deleted successfully.");
-      loadData();
-    } catch (err: any) {
-      const message = err?.response?.data?.message || "Failed to delete";
+      void loadData();
+    } catch (err: unknown) {
+      const message = (err as ApiError)?.response?.data?.message || "Failed to delete";
       await swalError({ title: "Delete failed", text: message });
       showToast(message, "error");
     }
@@ -208,9 +263,9 @@ export default function AcademicManagementPage() {
             ) : (
               data.map((item) => (
                 <tr key={item.id} className="hover:bg-muted/50">
-                  {activeTab === "classes" && <><td className="px-5 py-4 font-medium text-foreground">{item.name}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
-                  {activeTab === "subjects" && <><td className="px-5 py-4 text-foreground">{item.name}</td><td className="px-5 py-4 text-muted-foreground">{item.code || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.classLevel?.name || "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
-                  {activeTab === "batches" && <><td className="px-5 py-4 text-foreground">{item.name}</td><td className="px-5 py-4 text-muted-foreground">{item.branch?.name || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.capacity}</td><td className="px-5 py-4"><StatusBadge status={item.status} /></td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
+                  {activeTab === "classes" && <><td className="px-5 py-4 font-medium text-foreground">{item.name ?? "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
+                  {activeTab === "subjects" && <><td className="px-5 py-4 text-foreground">{item.name ?? "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.code || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.classLevel?.name || "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
+                  {activeTab === "batches" && <><td className="px-5 py-4 text-foreground">{item.name ?? "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.branch?.name || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.capacity ?? "—"}</td><td className="px-5 py-4"><StatusBadge status={item.status ?? "—"} /></td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
                   {activeTab === "batch-subjects" && <><td className="px-5 py-4 text-foreground">{item.batch?.name || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.subject?.name || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.teacher?.user?.name || "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
                 </tr>
               ))
@@ -234,15 +289,15 @@ export default function AcademicManagementPage() {
                 <>
                   <Field label="Name" required value={form.name || ""} onChange={(v) => setForm({ ...form, name: v })} />
                   <Field label="Code" value={form.code || ""} onChange={(v) => setForm({ ...form, code: v })} />
-                  <SelectField label="Class Level" required value={form.classLevelId || ""} onChange={(v) => setForm({ ...form, classLevelId: v })} options={classLevels.map((l) => ({ value: l.id, label: l.name }))} />
+                  <SelectField label="Class Level" required value={form.classLevelId || ""} onChange={(v) => setForm({ ...form, classLevelId: v })} options={classLevels.map((l) => ({ value: l.id, label: l.name ?? "" }))} />
                 </>
               )}
               {activeTab === "batches" && (
                 <>
                   <Field label="Name" required value={form.name || ""} onChange={(v) => setForm({ ...form, name: v })} />
                   <Field label="Capacity" required type="number" value={form.capacity || ""} onChange={(v) => setForm({ ...form, capacity: v })} />
-                  <SelectField label="Branch" required value={form.branchId || ""} onChange={(v) => setForm({ ...form, branchId: v })} options={branches.map((b) => ({ value: b.id, label: b.name }))} />
-                  <SelectField label="Class Level" required value={form.classLevelId || ""} onChange={(v) => setForm({ ...form, classLevelId: v })} options={classLevels.map((l) => ({ value: l.id, label: l.name }))} />
+                  <SelectField label="Branch" required value={form.branchId || ""} onChange={(v) => setForm({ ...form, branchId: v })} options={branches.map((b) => ({ value: b.id, label: b.name ?? b.id }))} />
+                  <SelectField label="Class Level" required value={form.classLevelId || ""} onChange={(v) => setForm({ ...form, classLevelId: v })} options={classLevels.map((l) => ({ value: l.id, label: l.name ?? l.id }))} />
                   <SelectField label="Status" value={form.status || "ACTIVE"} onChange={(v) => setForm({ ...form, status: v })} options={[{ value: "ACTIVE", label: "ACTIVE" }, { value: "INACTIVE", label: "INACTIVE" }]} />
                 </>
               )}
@@ -250,11 +305,11 @@ export default function AcademicManagementPage() {
                 <>
                   {modal === "create" && (
                     <>
-                      <SelectField label="Batch" required value={form.batchId || ""} onChange={(v) => setForm({ ...form, batchId: v })} options={batches.map((b) => ({ value: b.id, label: b.name }))} />
-                      <SelectField label="Subject" required value={form.subjectId || ""} onChange={(v) => setForm({ ...form, subjectId: v })} options={subjects.map((s) => ({ value: s.id, label: s.name }))} />
+                      <SelectField label="Batch" required value={form.batchId || ""} onChange={(v) => setForm({ ...form, batchId: v })} options={batches.map((b) => ({ value: b.id, label: b.name ?? b.id }))} />
+                      <SelectField label="Subject" required value={form.subjectId || ""} onChange={(v) => setForm({ ...form, subjectId: v })} options={subjects.map((s) => ({ value: s.id, label: s.name ?? s.id }))} />
                     </>
                   )}
-                  <SelectField label="Teacher" required value={form.teacherId || ""} onChange={(v) => setForm({ ...form, teacherId: v })} options={teachers.map((t) => ({ value: t.id, label: t.user?.name || t.id }))} />
+                  <SelectField label="Teacher" required value={form.teacherId || ""} onChange={(v) => setForm({ ...form, teacherId: v })} options={teachers.map((t) => ({ value: t.id, label: t.user?.name ?? t.id }))} />
                 </>
               )}
               <div className="flex justify-end gap-3 pt-4">
@@ -280,7 +335,7 @@ function ActionButtons({ onEdit, onDelete }: { onEdit: () => void; onDelete: () 
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status }: { status?: string }) {
   return (
     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${status === "ACTIVE" ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
       {status}

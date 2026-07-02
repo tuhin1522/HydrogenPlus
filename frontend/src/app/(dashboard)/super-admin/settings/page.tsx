@@ -76,43 +76,43 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F2F2F2]">System Settings</h1>
-          <p className="text-sm text-[#71717A] mt-1">Configure platform-wide settings</p>
+          <h1 className="text-2xl font-bold text-foreground">System Settings</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Configure platform-wide settings</p>
         </div>
-        <button onClick={() => openEdit()} className="px-4 py-2 bg-[#22C55E] text-[#052E16] text-sm font-bold rounded-lg hover:bg-[#16A34A] transition">
+        <button onClick={() => openEdit()} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90">
           + Add Setting
         </button>
       </div>
 
-      <div className="rounded-xl border border-[#1C1917] bg-[#111010] overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#1C1917] text-[#71717A] text-xs">
+            <tr className="border-b border-border text-xs text-muted-foreground">
               <th className="px-5 py-3 text-left font-medium uppercase">Key</th>
               <th className="px-5 py-3 text-left font-medium uppercase">Value</th>
               <th className="px-5 py-3 text-left font-medium uppercase">Description</th>
               <th className="px-5 py-3 text-right font-medium uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#1C1917]">
+          <tbody className="divide-y divide-border">
             {loading ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <tr key={i}>{Array.from({ length: 4 }).map((_, j) => <td key={j} className="px-5 py-4"><div className="h-4 bg-[#1C1917] rounded animate-pulse" /></td>)}</tr>
+                <tr key={i}>{Array.from({ length: 4 }).map((_, j) => <td key={j} className="px-5 py-4"><div className="h-4 animate-pulse rounded bg-muted/40" /></td>)}</tr>
               ))
             ) : settings.length === 0 ? (
-              <tr><td colSpan={4} className="px-5 py-16 text-center text-[#71717A]">No settings configured yet.</td></tr>
+              <tr><td colSpan={4} className="px-5 py-16 text-center text-muted-foreground">No settings configured yet.</td></tr>
             ) : (
               settings.map((s) => (
-                <tr key={s.id} className="hover:bg-[#1C1917]/20">
-                  <td className="px-5 py-4 font-mono text-[#22C55E]">{s.key}</td>
-                  <td className="px-5 py-4 text-[#F2F2F2] max-w-xs truncate">{s.value}</td>
-                  <td className="px-5 py-4 text-[#71717A]">{s.description || "—"}</td>
-                  <td className="px-5 py-4 text-right space-x-2">
-                    <button onClick={() => openEdit(s)} className="px-3 py-1 text-xs border border-[#27272A] text-[#A1A1AA] rounded-lg hover:text-[#22C55E]">Edit</button>
-                    <button onClick={() => handleDelete(s.key)} className="px-3 py-1 text-xs border border-[#27272A] text-[#A1A1AA] rounded-lg hover:text-[#EF4444]">Delete</button>
+                <tr key={s.id} className="hover:bg-muted/20">
+                  <td className="px-5 py-4 font-mono text-emerald-600">{s.key}</td>
+                  <td className="max-w-xs truncate px-5 py-4 text-foreground">{s.value}</td>
+                  <td className="px-5 py-4 text-muted-foreground">{s.description || "—"}</td>
+                  <td className="space-x-2 px-5 py-4 text-right">
+                    <button onClick={() => openEdit(s)} className="rounded-lg border border-border px-3 py-1 text-xs text-muted-foreground transition hover:text-primary">Edit</button>
+                    <button onClick={() => handleDelete(s.key)} className="rounded-lg border border-border px-3 py-1 text-xs text-muted-foreground transition hover:text-destructive">Delete</button>
                   </td>
                 </tr>
               ))
@@ -122,31 +122,31 @@ export default function SettingsPage() {
       </div>
 
       {modal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111010] border border-[#1C1917] w-full max-w-md rounded-2xl shadow-2xl">
-            <div className="px-6 py-4 border-b border-[#1C1917] flex justify-between items-center">
-              <h3 className="font-bold text-[#F2F2F2]">Save Setting</h3>
-              <button onClick={() => setModal(false)} className="text-[#71717A]">✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h3 className="font-bold text-foreground">Save Setting</h3>
+              <button onClick={() => setModal(false)} className="text-muted-foreground">✕</button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 p-6">
               <div>
-                <label className="block text-xs font-semibold text-[#71717A] uppercase mb-1.5">Key *</label>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Key *</label>
                 <input required value={form.key} onChange={(e) => setForm({ ...form, key: e.target.value })}
-                  className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] font-mono outline-none focus:border-[#22C55E]" />
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary font-mono" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#71717A] uppercase mb-1.5">Value *</label>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Value *</label>
                 <input required value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })}
-                  className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E]" />
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#71717A] uppercase mb-1.5">Description</label>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Description</label>
                 <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E]" />
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary" />
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={() => setModal(false)} className="px-4 py-2 text-sm text-[#71717A]">Cancel</button>
-                <button type="submit" disabled={submitting} className="px-4 py-2 bg-[#22C55E] text-[#052E16] text-sm font-bold rounded-lg disabled:opacity-50">
+                <button type="button" onClick={() => setModal(false)} className="px-4 py-2 text-sm text-muted-foreground">Cancel</button>
+                <button type="submit" disabled={submitting} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">
                   {submitting ? "Saving..." : "Save"}
                 </button>
               </div>
