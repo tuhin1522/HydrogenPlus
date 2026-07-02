@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
@@ -30,7 +30,7 @@ const navItems = [
   { label: "Settings", href: "/teacher/settings", icon: "⚙️" },
 ];
 
-export function TeacherShell({ children }: { children: React.ReactNode }) {
+export function TeacherShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();

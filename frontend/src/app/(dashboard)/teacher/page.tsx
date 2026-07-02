@@ -1,5 +1,5 @@
-import { DashboardOverview } from "@/app/modules/teacher/components/dashboard-overview";
-import { PageShell } from "@/app/modules/teacher/components/page-shell";
+import { DashboardOverview } from "../../modules/teacher/components/dashboardOverview";
+import { PageShell } from "../../modules/teacher/components/pageShell";
 
 export default function TeacherDashboardPage() {
   return (

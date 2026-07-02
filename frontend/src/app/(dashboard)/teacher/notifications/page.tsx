@@ -1,4 +1,4 @@
-import { PageShell } from "@/app/modules/teacher/components/page-shell";
+import { PageShell } from "../../../modules/teacher/components/pageShell";
 
 const notifications = [
   { title: "Exam alert", description: "Mid-term Physics exam is scheduled for next week.", time: "5m ago" },
