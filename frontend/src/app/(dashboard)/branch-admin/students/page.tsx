@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import branchAdminApi from "../api";
+import { branchAdminService } from "../../../modules/branch-admin/services/branch-admin.service";
 
 type Student = {
   id: string;
@@ -51,27 +51,32 @@ export default function StudentsPage() {
     try {
       setLoading(true);
       setError("");
-      const res = await branchAdminApi.getAllStudents();
-      setStudents(res.data?.students || res.data?.data || res.data || []);
-    } catch (e: any) {
-      setError(e?.response?.data?.message || "Failed to load students.");
+      const res = await branchAdminService.getStudents();
+      setStudents(res?.students || res?.data || []);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to load students.";
+      setError(message);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadStudents();
-    branchAdminApi.getAllClassLevels().then((r) => {
-      setClassLevels(r.data?.classLevels || r.data?.data || r.data || []);
-    }).catch(() => {});
+    const timeoutId = window.setTimeout(() => {
+      void loadStudents();
+      void branchAdminService.getClassLevels().then((r) => {
+        setClassLevels(r?.classLevels || r?.data || []);
+      }).catch(() => {});
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [loadStudents]);
 
   const handleAdmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSubmitting(true);
-      await branchAdminApi.createStudent(form);
+      await branchAdminService.createStudent(form);
       setAddModalOpen(false);
       setForm({ userId: "", firstName: "", lastName: "", classLevelId: "" });
       await loadStudents();
@@ -85,7 +90,7 @@ export default function StudentsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this student? This cannot be undone.")) return;
     try {
-      await branchAdminApi.deleteStudent(id);
+      await branchAdminService.deleteStudent(id);
       await loadStudents();
     } catch (e: any) {
       alert(e?.response?.data?.message || "Failed to delete.");

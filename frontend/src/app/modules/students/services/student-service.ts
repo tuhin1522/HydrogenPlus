@@ -1,7 +1,7 @@
 import axiosInstance from "@/app/services/axiosInstance";
 import { toast } from "sonner";
 import type { StudentDashboardOverview } from "@/app/modules/students/types";
-import { normalizeStudentDashboardOverview } from "@/app/modules/students/validation/student-dashboard-validation";
+import { normalizeStudentDashboardOverview } from "@/app/modules/students/validation/student.validation";
 
 export const studentService = {
   async getDashboardOverview(): Promise<StudentDashboardOverview> {
