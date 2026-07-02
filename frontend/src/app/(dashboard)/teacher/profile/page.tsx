@@ -1,5 +1,5 @@
-import { PageShell } from "@/app/modules/teacher/components/page-shell";
-import { EmptyState } from "@/app/modules/teacher/components/empty-state";
+import { PageShell } from "../../../modules/teacher/components/PageShell";
+import { EmptyState } from "../../../modules/teacher/components/EmptyState";
 
 export default function TeacherProfilePage() {
   return (

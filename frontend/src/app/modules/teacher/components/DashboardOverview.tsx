@@ -1,32 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { teacherService, type TeacherDashboardOverview } from "@/app/modules/teacher/services/teacher.service";
-import { ContentSkeleton } from "@/app/modules/teacher/components/content-skeleton";
+import { useMemo } from "react";
+import { useTeacherDashboard } from "../hooks/use-teacher-dashboard";
+import { ContentSkeleton } from "./ContentSkeleton";
 
 export function DashboardOverview() {
-  const [overview, setOverview] = useState<TeacherDashboardOverview | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      setLoading(true);
-      const data = await teacherService.getDashboardOverview();
-      if (mounted) {
-        setOverview(data);
-        setLoading(false);
-        toast.success("Dashboard refreshed");
-      }
-    };
-
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const { overview, loading } = useTeacherDashboard();
 
   const stats = useMemo(
     () => [
