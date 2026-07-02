@@ -1,4 +1,4 @@
-import { ModulePage } from "@/app/modules/student/components/shared/module-page";
+import { ModulePage } from "@/app/modules/students/components/modulePage";
 
 export default function StudentRoutinePage() {
   return (

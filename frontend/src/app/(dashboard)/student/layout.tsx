@@ -1,4 +1,4 @@
-import { StudentShell } from "@/app/modules/student/components/shared/student-shell";
+import { StudentShell } from "@/app/modules/students/components/studentShell";
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   return <StudentShell>{children}</StudentShell>;

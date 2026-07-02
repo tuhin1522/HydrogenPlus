@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { teacherService, type TeacherDashboardOverview } from "@/app/modules/teacher/services/teacher.service";
-import { ContentSkeleton } from "@/app/modules/teacher/components/shared/content-skeleton";
+import { ContentSkeleton } from "@/app/modules/teacher/components/content-skeleton";
 
 export function DashboardOverview() {
   const [overview, setOverview] = useState<TeacherDashboardOverview | null>(null);

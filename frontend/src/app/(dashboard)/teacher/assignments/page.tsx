@@ -1,4 +1,4 @@
-import { PageShell } from "@/app/modules/teacher/components/shared/page-shell";
+import { PageShell } from "@/app/modules/teacher/components/page-shell";
 
 export default function TeacherAssignmentsPage() {
   return (
