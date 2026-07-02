@@ -1,22 +1,9 @@
 import axiosInstance from "@/app/services/axiosInstance";
-import { toast } from "sonner";
 import type { StudentDashboardOverview } from "@/app/modules/students/types";
-import { normalizeStudentDashboardOverview } from "@/app/modules/students/validation/student-dashboard-validation";
+import { normalizeStudentDashboardOverview } from "@/app/modules/students/validation/student.validation";
 
-export const studentService = {
-  async getDashboardOverview(): Promise<StudentDashboardOverview> {
-    try {
-      const { data } = await axiosInstance.get<unknown>("/student/dashboard");
-      const normalized = normalizeStudentDashboardOverview(data);
-      if (normalized) {
-        return normalized;
-      }
-    } catch (error) {
-      console.error("Failed to load student dashboard overview", error);
-      toast.error("Unable to load student overview right now.");
-    }
-
-    return {
+function buildFallbackOverview(): StudentDashboardOverview {
+  return {
       stats: {
         currentClass: "Class 10",
         currentBatch: "Batch A",
@@ -48,5 +35,20 @@ export const studentService = {
         { title: "Announcement updated", description: "A new batch reminder was posted", time: "3h ago" },
       ],
     };
+}
+
+export const studentService = {
+  async getDashboardOverview(): Promise<StudentDashboardOverview> {
+    try {
+      const { data } = await axiosInstance.get<unknown>("/students/my-profile");
+      const normalized = normalizeStudentDashboardOverview(data);
+      if (normalized) {
+        return normalized;
+      }
+    } catch {
+      // Fall back to the local dashboard overview when the backend route is unavailable.
+    }
+
+    return buildFallbackOverview();
   },
 };

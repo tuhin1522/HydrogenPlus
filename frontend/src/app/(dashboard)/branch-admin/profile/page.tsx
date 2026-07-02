@@ -1,24 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+type ProfileUser = {
+  name?: string;
+  email?: string;
+  phone?: string;
+};
+
+function readStoredUser(): ProfileUser | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const stored = window.localStorage.getItem("user");
+    if (!stored) return null;
+    return JSON.parse(stored) as ProfileUser;
+  } catch {
+    return null;
+  }
+}
+
+function getInitialForm(user: ProfileUser | null) {
+  return {
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    branch: "Dhaka Central Branch",
+  };
+}
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<ProfileUser | null>(() => readStoredUser());
   const [editing, setEditing] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", branch: "Dhaka Central Branch" });
+  const [form, setForm] = useState(() => getInitialForm(readStoredUser()));
   const [pwForm, setPwForm] = useState({ current: "", newPw: "", confirm: "" });
   const [saved, setSaved] = useState(false);
   const [pwSaved, setPwSaved] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setUser(parsed);
-      setForm({ name: parsed.name || "", email: parsed.email || "", phone: parsed.phone || "", branch: "Dhaka Central Branch" });
-    }
-  }, []);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();

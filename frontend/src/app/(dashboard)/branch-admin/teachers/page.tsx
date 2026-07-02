@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import branchAdminApi from "../api";
+import { useState, useCallback } from "react";
+import { branchAdminService } from "../../../modules/branch-admin/services/branch-admin.service";
 
 type Teacher = {
   id: string;
@@ -33,27 +33,31 @@ export default function TeachersPage() {
     try {
       setLoading(true);
       setError("");
-      const res = await branchAdminApi.getAllTeachers();
-      setTeachers(res.data?.teachers || res.data?.data || res.data || []);
-    } catch (e: any) {
-      setError(e?.response?.data?.message || "Failed to load teachers.");
+      const res = await branchAdminService.getTeachers();
+      setTeachers(res?.teachers || res?.data || []);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to load teachers.";
+      setError(message);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { loadTeachers(); }, [loadTeachers]);
+  useState(() => {
+    void loadTeachers();
+  });
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSubmitting(true);
-      await branchAdminApi.createTeacher(form);
+      await branchAdminService.createTeacher(form);
       setAddModalOpen(false);
       setForm({ userId: "", firstName: "", lastName: "", phone: "" });
       await loadTeachers();
-    } catch (e: any) {
-      alert(e?.response?.data?.message || "Failed to add teacher.");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to add teacher.";
+      alert(message);
     } finally {
       setSubmitting(false);
     }
@@ -62,10 +66,11 @@ export default function TeachersPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Remove this teacher? This cannot be undone.")) return;
     try {
-      await branchAdminApi.deleteTeacher(id);
+      await branchAdminService.deleteTeacher(id);
       await loadTeachers();
-    } catch (e: any) {
-      alert(e?.response?.data?.message || "Failed to delete.");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to delete.";
+      alert(message);
     }
   };
 

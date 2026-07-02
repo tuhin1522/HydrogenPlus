@@ -1,5 +1,5 @@
 import { DashboardOverview } from "@/app/modules/students/components/DashboardOverview";
-import { PageShell } from "@/app/modules/students/components/pageShell";
+import { PageShell } from "@/app/modules/students/components/PageShell";
 
 export default function StudentDashboardPage() {
   return (
