@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import { SonnerGlobal } from "./components/modern-ui/sonner";
 import "./styles/globals.css";
 
@@ -21,12 +22,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} h-full antialiased dark`}
+      className={`${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">
-        {children}
-        <SonnerGlobal position="top-right" richColors closeButton />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+          <SonnerGlobal position="top-right" richColors closeButton />
+        </ThemeProvider>
       </body>
     </html>
   );
