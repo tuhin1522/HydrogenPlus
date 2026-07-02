@@ -1,4 +1,4 @@
-import { PageShell } from "@/app/components/teacher/shared/page-shell";
+import { PageShell } from "@/app/modules/teacher/components/shared/page-shell";
 
 const lessons = [
   { title: "Chapter 1 Overview", type: "Video", duration: "12 min", visibility: "Published", order: 1 },

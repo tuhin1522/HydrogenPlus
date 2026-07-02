@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { teacherService, type TeacherDashboardOverview } from "@/app/services/teacher";
-import { ContentSkeleton } from "@/app/components/teacher/shared/content-skeleton";
+import { teacherService, type TeacherDashboardOverview } from "@/app/modules/teacher/services/teacher.service";
+import { ContentSkeleton } from "@/app/modules/teacher/components/shared/content-skeleton";
 
 export function DashboardOverview() {
   const [overview, setOverview] = useState<TeacherDashboardOverview | null>(null);

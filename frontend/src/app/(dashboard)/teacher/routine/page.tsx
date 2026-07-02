@@ -1,4 +1,4 @@
-import { PageShell } from "@/app/components/teacher/shared/page-shell";
+import { PageShell } from "@/app/modules/teacher/components/shared/page-shell";
 
 const routine = [
   { day: "Monday", session: "09:00 - 10:30", batch: "Batch A", subject: "Physics" },
