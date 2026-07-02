@@ -189,7 +189,12 @@ export default function Navbar() {
 
           {user ? (
             <>
-              <Link href="/dashboard" className={`rounded-full px-4 py-2 text-sm font-semibold transition ${hover} ${isDark ? "text-white" : "text-black"}`}>
+              <Link href={
+                user.role === "SUPER_ADMIN" ? "/super-admin/overview" :
+                user.role === "TEACHER" ? "/teacher" :
+                user.role === "BRANCH_ADMIN" ? "/branch-admin" :
+                user.role === "STUDENT" ? "/student" : "/dashboard"
+              } className={`rounded-full px-4 py-2 text-sm font-semibold transition ${hover} ${isDark ? "text-white" : "text-black"}`}>
                 {user.name}
               </Link>
               <button
@@ -301,7 +306,12 @@ export default function Navbar() {
             <div className="mt-3 flex flex-wrap gap-2">
               {user ? (
                 <>
-                  <Link href="/dashboard" className={`rounded-full px-3 py-2 text-sm font-semibold ${isDark ? "bg-[#081717] text-[#F3F7F6]" : "bg-white text-[#081717]"}`}>
+                  <Link href={
+                    user.role === "SUPER_ADMIN" ? "/super-admin/overview" :
+                    user.role === "TEACHER" ? "/teacher" :
+                    user.role === "BRANCH_ADMIN" ? "/branch-admin" :
+                    user.role === "STUDENT" ? "/student" : "/dashboard"
+                  } className={`rounded-full px-3 py-2 text-sm font-semibold ${isDark ? "bg-[#081717] text-[#F3F7F6]" : "bg-white text-[#081717]"}`}>
                     {user.name}
                   </Link>
                   <button onClick={handleLogout} className={`rounded-full px-3 py-2 text-sm font-semibold ${accent} text-[#081717]`}>

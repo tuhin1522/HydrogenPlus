@@ -32,32 +32,12 @@ export default function SuperAdminLayout({
   const pathname = usePathname();
   const normalizedPath = (pathname || "").split("?")[0].split("#")[0];
   const activeSection = normalizedPath.replace(/^\/super-admin\/?/, "").split("/")[0] || "overview";
-  const [user] = useState<SuperAdminUser | null>(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    const userData = window.localStorage.getItem("user");
-    const token = window.localStorage.getItem("token");
-
-    if (!token || !userData) {
-      return null;
-    }
-
-    try {
-      const parsed = JSON.parse(userData) as SuperAdminUser;
-      return parsed.role === "SUPER_ADMIN" ? parsed : null;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState<SuperAdminUser | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
+    setMounted(true);
     const userData = window.localStorage.getItem("user");
     const token = window.localStorage.getItem("token");
 
@@ -75,6 +55,8 @@ export default function SuperAdminLayout({
           STUDENT: "/student",
         };
         router.push(roleMap[parsed.role || ""] || "/login");
+      } else {
+        setUser(parsed);
       }
     } catch {
       router.push("/login");
@@ -87,38 +69,38 @@ export default function SuperAdminLayout({
     router.push("/login");
   }, [router]);
 
-  if (!user) {
+  if (!mounted || !user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#0D0B0A]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#22C55E] border-t-transparent" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-[#0D0B0A] text-[#F2F2F2] font-sans antialiased overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground font-sans antialiased overflow-hidden">
       {/* ====== SIDEBAR ====== */}
       <aside
         className={`${
           sidebarCollapsed ? "w-16" : "w-64"
-        } transition-all duration-300 border-r border-[#1C1917] bg-[#080706] flex flex-col shrink-0`}
+        } transition-all duration-300 border-r border-border bg-card flex flex-col shrink-0`}
       >
         {/* Logo */}
-        <div className="h-16 px-4 border-b border-[#1C1917] flex items-center justify-between shrink-0">
+        <div className="h-16 px-4 border-b border-border flex items-center justify-between shrink-0">
           {!sidebarCollapsed && (
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-[#22C55E] flex items-center justify-center font-bold text-[#052E16] text-sm shrink-0">
+            <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center font-bold text-primary-foreground text-sm shrink-0">
                 H+
               </div>
               <div>
-                <p className="font-bold text-sm text-[#FAFAFA] leading-tight">Hydrogen Plus</p>
-                <p className="text-[10px] text-[#A1A1AA]">Super Admin</p>
+                <p className="font-bold text-sm text-foreground leading-tight">Hydrogen Plus</p>
+                <p className="text-[10px] text-muted-foreground">Super Admin</p>
               </div>
-            </div>
+            </Link>
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-1.5 rounded-lg hover:bg-[#1C1917] text-[#A1A1AA] hover:text-[#F2F2F2] transition ml-auto"
+            className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition ml-auto"
           >
             {sidebarCollapsed ? "→" : "←"}
           </button>
@@ -134,8 +116,8 @@ export default function SuperAdminLayout({
                 href={item.path}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 group ${
                   isActive
-                    ? "bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20"
-                    : "text-[#71717A] hover:bg-[#1C1917] hover:text-[#F2F2F2]"
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}
                 title={sidebarCollapsed ? item.label : undefined}
               >
@@ -147,22 +129,22 @@ export default function SuperAdminLayout({
         </nav>
 
         {/* User Profile */}
-        <div className="p-3 border-t border-[#1C1917] shrink-0">
+        <div className="p-3 border-t border-border shrink-0">
           <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"}`}>
-            <div className="h-8 w-8 rounded-full bg-[#22C55E] flex items-center justify-center text-[#052E16] font-bold text-xs shrink-0">
+            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs shrink-0">
               {user.name?.charAt(0)?.toUpperCase() || "S"}
             </div>
             {!sidebarCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#F2F2F2] truncate">{user.name}</p>
-                <p className="text-[10px] text-[#71717A] truncate">{user.email}</p>
+                <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
               </div>
             )}
             {!sidebarCollapsed && (
               <button
                 onClick={handleLogout}
                 title="Sign out"
-                className="p-1.5 rounded-lg hover:bg-[#EF4444]/10 hover:text-[#EF4444] text-[#71717A] transition shrink-0"
+                className="p-1.5 rounded-lg hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition shrink-0"
               >
                 🚪
               </button>
@@ -171,7 +153,7 @@ export default function SuperAdminLayout({
           {sidebarCollapsed && (
             <button
               onClick={handleLogout}
-              className="mt-2 w-full p-1.5 rounded-lg hover:bg-[#EF4444]/10 hover:text-[#EF4444] text-[#71717A] transition flex justify-center"
+              className="mt-2 w-full p-1.5 rounded-lg hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition flex justify-center"
             >
               🚪
             </button>
@@ -182,26 +164,26 @@ export default function SuperAdminLayout({
       {/* ====== MAIN CONTENT ====== */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 border-b border-[#1C1917] bg-[#080706]/80 backdrop-blur-sm px-6 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2 text-sm text-[#71717A]">
+        <header className="h-16 border-b border-border bg-card/80 backdrop-blur-sm px-6 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Super Admin</span>
             <span>/</span>
-            <span className="text-[#F2F2F2] font-medium capitalize">
+            <span className="text-foreground font-medium capitalize">
               {MENU_ITEMS.find((m) => activeSection === m.id)?.label || "Dashboard"}
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="px-2 py-1 rounded-full bg-[#22C55E]/10 text-[#22C55E] text-xs border border-[#22C55E]/20 font-medium">
+            <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs border border-primary/20 font-medium">
               Super Admin
             </span>
-            <div className="h-7 w-7 rounded-full bg-[#22C55E] flex items-center justify-center text-[#052E16] font-bold text-xs">
+            <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs">
               {user.name?.charAt(0)?.toUpperCase() || "S"}
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-[#0D0B0A]">
+        <main className="flex-1 overflow-y-auto bg-background">
           {children}
         </main>
       </div>
