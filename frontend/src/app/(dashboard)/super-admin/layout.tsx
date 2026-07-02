@@ -18,6 +18,7 @@ const MENU_ITEMS = [
   { id: "courses", label: "Courses", icon: "🎯", path: "/super-admin/courses" },
   { id: "payments", label: "Payments", icon: "💳", path: "/super-admin/payments" },
   { id: "analytics", label: "Analytics", icon: "📈", path: "/super-admin/analytics" },
+  { id: "profile", label: "Profile", icon: "👤", path: "/super-admin/profile" },
   { id: "announcements", label: "Announcements", icon: "📣", path: "/super-admin/announcements" },
   { id: "notifications", label: "Notifications", icon: "🔔", path: "/super-admin/notifications" },
   { id: "users", label: "All Users", icon: "👥", path: "/super-admin/users" },
@@ -280,6 +281,9 @@ export default function SuperAdminLayout({
 
               {showProfileMenu ? (
                 <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-border bg-card p-2 shadow-xl">
+                  <Link href="/super-admin/profile" className="flex items-center rounded-lg px-3 py-2 text-sm text-foreground transition hover:bg-secondary">
+                    👤 Profile
+                  </Link>
                   <Link href="/super-admin/settings" className="flex items-center rounded-lg px-3 py-2 text-sm text-foreground transition hover:bg-secondary">
                     ⚙️ Settings
                   </Link>
