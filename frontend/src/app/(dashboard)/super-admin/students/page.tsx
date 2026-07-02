@@ -179,16 +179,15 @@ export default function StudentsPage() {
   });
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F2F2F2]">Student Management</h1>
-          <p className="text-sm text-[#71717A] mt-1">View and manage enrolled students, track progress and payments.</p>
+          <h1 className="text-2xl font-bold text-foreground">Student Management</h1>
+          <p className="mt-1 text-sm text-muted-foreground">View and manage enrolled students, track progress and payments.</p>
         </div>
         <div className="flex gap-2">
           {selectedIds.length > 0 && (
-            <button onClick={handleBulkPromote} className="px-4 py-2 bg-[#3B82F6]/20 border border-[#3B82F6]/30 text-[#3B82F6] text-sm font-bold rounded-lg hover:bg-[#3B82F6]/30 transition">
+            <button onClick={handleBulkPromote} className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-500/20">
               Promote Selected ({selectedIds.length})
             </button>
           )}
@@ -197,116 +196,114 @@ export default function StudentsPage() {
               setForm({ name: "", email: "", phone: "", password: "", batchId: "", guardianName: "", guardianPhone: "", schoolName: "", address: "", admissionDate: new Date().toISOString().slice(0, 10) });
               setModal("create");
             }}
-            className="px-4 py-2 bg-[#22C55E] text-[#052E16] text-sm font-bold rounded-lg hover:bg-[#16A34A] transition"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"
           >
             + Enroll Student
           </button>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-4 bg-[#111010] p-4 rounded-xl border border-[#1C1917]">
-        <div className="relative flex-1 max-w-sm">
-          <span className="absolute inset-y-0 left-3 flex items-center text-[#71717A] text-sm">🔍</span>
+      <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
+        <div className="relative max-w-sm flex-1">
+          <span className="absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">🔍</span>
           <input
             type="text"
             placeholder="Search students..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg pl-9 pr-4 py-2 text-sm text-[#F2F2F2] placeholder-[#71717A] outline-none focus:border-[#22C55E] transition"
+            className="w-full rounded-lg border border-border bg-background pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary"
           />
         </div>
-        <select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} className="bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E]">
+        <select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary">
           <option value="">All Classes</option>
           {classLevels.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)} className="bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E]">
+        <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary">
           <option value="">All Branches</option>
           {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
         </select>
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E]">
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary">
           <option value="">All Statuses</option>
           <option value="ACTIVE">Active</option>
           <option value="INACTIVE">Inactive</option>
         </select>
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl border border-[#1C1917] bg-[#111010] overflow-hidden shadow-2xl">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1C1917] text-[#71717A] text-xs bg-[#080706]">
-                <th className="px-5 py-4 text-left font-medium uppercase tracking-wider w-10">
-                  <input type="checkbox" checked={selectedIds.length === filteredStudents.length && filteredStudents.length > 0} onChange={toggleSelectAll} className="accent-[#22C55E] h-4 w-4 rounded border-[#1C1917]" />
+              <tr className="border-b border-border bg-muted/20 text-xs text-muted-foreground">
+                <th className="w-10 px-5 py-4 text-left font-medium uppercase tracking-wider">
+                  <input type="checkbox" checked={selectedIds.length === filteredStudents.length && filteredStudents.length > 0} onChange={toggleSelectAll} className="h-4 w-4 rounded border-border accent-primary" />
                 </th>
                 <th className="px-5 py-4 text-left font-medium uppercase tracking-wider">Student</th>
                 <th className="px-5 py-4 text-left font-medium uppercase tracking-wider">Class & Branch</th>
                 <th className="px-5 py-4 text-left font-medium uppercase tracking-wider">Contact</th>
-                <th className="px-5 py-4 text-left font-medium uppercase tracking-wider min-w-[120px]">Progress</th>
+                <th className="min-w-[120px] px-5 py-4 text-left font-medium uppercase tracking-wider">Progress</th>
                 <th className="px-5 py-4 text-center font-medium uppercase tracking-wider">Payment Status</th>
                 <th className="px-5 py-4 text-right font-medium uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1C1917]">
+            <tbody className="divide-y divide-border">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
-                  <tr key={i}>{Array.from({ length: 7 }).map((_, j) => <td key={j} className="px-5 py-5"><div className="h-4 bg-[#1C1917] rounded animate-pulse" /></td>)}</tr>
+                  <tr key={i}>{Array.from({ length: 7 }).map((_, j) => <td key={j} className="px-5 py-5"><div className="h-4 animate-pulse rounded bg-muted/30" /></td>)}</tr>
                 ))
               ) : filteredStudents.length === 0 ? (
-                <tr><td colSpan={7} className="px-5 py-16 text-center"><p className="text-[#71717A] text-lg">No students found matching your criteria.</p></td></tr>
+                <tr><td colSpan={7} className="px-5 py-16 text-center"><p className="text-lg text-muted-foreground">No students found matching your criteria.</p></td></tr>
               ) : (
                 filteredStudents.map((s) => {
-                  const progress = Math.floor(Math.random() * 60) + 40; // Mock progress 40-100%
+                  const progress = Math.floor(Math.random() * 60) + 40;
                   const paymentStatuses = ["PAID", "PENDING", "OVERDUE"];
-                  const paymentStatus = paymentStatuses[s.user?.name?.length % 3] || "PAID"; // Mock payment status based on name length
-                  
+                  const paymentStatus = paymentStatuses[s.user?.name?.length % 3] || "PAID";
+
                   return (
-                    <tr key={s.id} className="hover:bg-[#1C1917]/30 transition-colors group">
+                    <tr key={s.id} className="group transition-colors hover:bg-muted/20">
                       <td className="px-5 py-4">
-                        <input type="checkbox" checked={selectedIds.includes(s.id)} onChange={() => toggleSelect(s.id)} className="accent-[#22C55E] h-4 w-4 rounded border-[#1C1917]" />
+                        <input type="checkbox" checked={selectedIds.includes(s.id)} onChange={() => toggleSelect(s.id)} className="h-4 w-4 rounded border-border accent-primary" />
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-[#22C55E]/20 text-[#22C55E] flex items-center justify-center font-bold shadow-inner">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-bold text-primary shadow-inner">
                             {s.user?.name?.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-bold text-[#F2F2F2]">{s.user?.name || "N/A"}</p>
-                            <p className="text-xs text-[#71717A]">ID: {s.id.slice(-6).toUpperCase()}</p>
+                            <p className="font-bold text-foreground">{s.user?.name || "N/A"}</p>
+                            <p className="text-xs text-muted-foreground">ID: {s.id.slice(-6).toUpperCase()}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <p className="text-[#F2F2F2] font-medium">{s.batch?.classLevel?.name || "Class N/A"}</p>
-                        <p className="text-xs text-[#A1A1AA]">{s.batch?.branch?.name || "Branch N/A"}</p>
+                        <p className="font-medium text-foreground">{s.batch?.classLevel?.name || "Class N/A"}</p>
+                        <p className="text-xs text-muted-foreground">{s.batch?.branch?.name || "Branch N/A"}</p>
                       </td>
                       <td className="px-5 py-4">
-                        <p className="text-[#F2F2F2]">{s.user?.phone}</p>
-                        <p className="text-xs text-[#71717A] truncate max-w-[120px]" title={s.user?.email}>{s.user?.email}</p>
+                        <p className="text-foreground">{s.user?.phone}</p>
+                        <p className="max-w-[120px] truncate text-xs text-muted-foreground" title={s.user?.email}>{s.user?.email}</p>
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-[#1C1917] rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full ${progress >= 80 ? 'bg-[#22C55E]' : progress >= 50 ? 'bg-[#EAB308]' : 'bg-[#EF4444]'}`} style={{ width: `${progress}%` }} />
+                          <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                            <div className={`h-full rounded-full ${progress >= 80 ? 'bg-primary' : progress >= 50 ? 'bg-amber-500' : 'bg-destructive'}`} style={{ width: `${progress}%` }} />
                           </div>
-                          <span className="text-xs font-medium text-[#A1A1AA] w-8">{progress}%</span>
+                          <span className="w-8 text-xs font-medium text-muted-foreground">{progress}%</span>
                         </div>
                       </td>
                       <td className="px-5 py-4 text-center">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider ${
-                          paymentStatus === "PAID" ? "bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30" :
-                          paymentStatus === "PENDING" ? "bg-[#EAB308]/10 text-[#EAB308] border border-[#EAB308]/30" :
-                          "bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30"
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wider ${
+                          paymentStatus === "PAID" ? "border border-primary/30 bg-primary/10 text-primary" :
+                          paymentStatus === "PENDING" ? "border border-amber-500/30 bg-amber-500/10 text-amber-600" :
+                          "border border-destructive/30 bg-destructive/10 text-destructive"
                         }`}>
                           {paymentStatus}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => openDetails(s.id)} className="px-2.5 py-1.5 text-xs bg-[#1C1917] text-[#F2F2F2] rounded hover:bg-[#3B82F6] transition" title="View">👁️</button>
-                          <button onClick={() => openEdit(s)} className="px-2.5 py-1.5 text-xs bg-[#1C1917] text-[#F2F2F2] rounded hover:bg-[#22C55E] hover:text-[#052E16] transition" title="Edit">✏️</button>
-                          <button onClick={() => handleDelete(s.id)} className="px-2.5 py-1.5 text-xs bg-[#1C1917] text-[#F2F2F2] rounded hover:bg-[#EF4444] transition" title="Delete">🗑️</button>
+                        <div className="flex items-center justify-end gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                          <button onClick={() => openDetails(s.id)} className="rounded bg-muted px-2.5 py-1.5 text-xs text-foreground transition hover:bg-primary hover:text-primary-foreground" title="View">👁️</button>
+                          <button onClick={() => openEdit(s)} className="rounded bg-muted px-2.5 py-1.5 text-xs text-foreground transition hover:bg-primary hover:text-primary-foreground" title="Edit">✏️</button>
+                          <button onClick={() => handleDelete(s.id)} className="rounded bg-muted px-2.5 py-1.5 text-xs text-foreground transition hover:bg-destructive hover:text-white" title="Delete">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -318,52 +315,50 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      {/* Details Modal (Keeping existing simple design) */}
       {modal === "details" && selectedStudent && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111010] border border-[#1C1917] w-full max-w-lg rounded-2xl shadow-2xl p-6 relative">
-            <button onClick={() => setModal(null)} className="absolute top-4 right-4 text-[#71717A] hover:text-[#F2F2F2] transition">✕</button>
-            <div className="flex items-center gap-4 mb-6">
-              <div className="h-16 w-16 rounded-full bg-[#22C55E]/20 text-[#22C55E] flex items-center justify-center text-2xl font-bold shadow-inner">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl">
+            <button onClick={() => setModal(null)} className="absolute right-4 top-4 text-muted-foreground transition hover:text-foreground">✕</button>
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-2xl font-bold text-primary shadow-inner">
                 {selectedStudent.user?.name?.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h3 className="font-bold text-[#F2F2F2] text-xl">{selectedStudent.user?.name}</h3>
-                <p className="text-[#A1A1AA] text-sm">{selectedStudent.batch?.classLevel?.name} • {selectedStudent.batch?.branch?.name}</p>
+                <h3 className="text-xl font-bold text-foreground">{selectedStudent.user?.name}</h3>
+                <p className="text-sm text-muted-foreground">{selectedStudent.batch?.classLevel?.name} • {selectedStudent.batch?.branch?.name}</p>
               </div>
             </div>
-            
+
             <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-4 bg-[#0D0B0A] p-4 rounded-lg border border-[#1C1917]">
-                <div><span className="text-[#71717A] block text-xs">Email</span><span className="text-[#F2F2F2]">{selectedStudent.user?.email}</span></div>
-                <div><span className="text-[#71717A] block text-xs">Phone</span><span className="text-[#F2F2F2]">{selectedStudent.user?.phone}</span></div>
-                <div><span className="text-[#71717A] block text-xs">Admission</span><span className="text-[#F2F2F2]">{new Date(selectedStudent.admissionDate).toLocaleDateString()}</span></div>
-                <div><span className="text-[#71717A] block text-xs">Status</span><span className="text-[#22C55E] font-medium">ACTIVE</span></div>
+              <div className="grid grid-cols-2 gap-4 rounded-lg border border-border bg-background p-4">
+                <div><span className="mb-1 block text-xs text-muted-foreground">Email</span><span className="text-foreground">{selectedStudent.user?.email}</span></div>
+                <div><span className="mb-1 block text-xs text-muted-foreground">Phone</span><span className="text-foreground">{selectedStudent.user?.phone}</span></div>
+                <div><span className="mb-1 block text-xs text-muted-foreground">Admission</span><span className="text-foreground">{new Date(selectedStudent.admissionDate).toLocaleDateString()}</span></div>
+                <div><span className="mb-1 block text-xs text-muted-foreground">Status</span><span className="font-medium text-primary">ACTIVE</span></div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4 bg-[#0D0B0A] p-4 rounded-lg border border-[#1C1917]">
-                <div><span className="text-[#71717A] block text-xs">Guardian Name</span><span className="text-[#F2F2F2]">{selectedStudent.guardianName}</span></div>
-                <div><span className="text-[#71717A] block text-xs">Guardian Phone</span><span className="text-[#F2F2F2]">{selectedStudent.guardianPhone}</span></div>
-                <div className="col-span-2"><span className="text-[#71717A] block text-xs">Address</span><span className="text-[#F2F2F2]">{selectedStudent.address || "N/A"}</span></div>
+
+              <div className="grid grid-cols-2 gap-4 rounded-lg border border-border bg-background p-4">
+                <div><span className="mb-1 block text-xs text-muted-foreground">Guardian Name</span><span className="text-foreground">{selectedStudent.guardianName}</span></div>
+                <div><span className="mb-1 block text-xs text-muted-foreground">Guardian Phone</span><span className="text-foreground">{selectedStudent.guardianPhone}</span></div>
+                <div className="col-span-2"><span className="mb-1 block text-xs text-muted-foreground">Address</span><span className="text-foreground">{selectedStudent.address || "N/A"}</span></div>
               </div>
             </div>
-            
+
             <div className="mt-6 flex justify-end">
-               <button onClick={() => setModal(null)} className="px-4 py-2 bg-[#27272A] text-[#F2F2F2] text-sm font-medium rounded-lg hover:bg-[#3F3F46] transition">Close</button>
+              <button onClick={() => setModal(null)} className="rounded-lg bg-muted px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted/80">Close</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Edit / Create Modal */}
       {(modal === "edit" || modal === "create") && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111010] border border-[#1C1917] w-full max-w-lg rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-[#1C1917] flex justify-between items-center sticky top-0 bg-[#111010]">
-              <h3 className="font-bold text-[#F2F2F2]">{modal === "create" ? "Enroll Student" : "Edit Student Profile"}</h3>
-              <button onClick={() => setModal(null)} className="text-[#71717A] hover:text-[#F2F2F2] transition">✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl">
+            <div className="sticky top-0 flex items-center justify-between border-b border-border bg-card px-6 py-4">
+              <h3 className="font-bold text-foreground">{modal === "create" ? "Enroll Student" : "Edit Student Profile"}</h3>
+              <button onClick={() => setModal(null)} className="text-muted-foreground transition hover:text-foreground">✕</button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 p-6">
               {modal === "create" && (
                 <>
                   {[
@@ -373,23 +368,23 @@ export default function StudentsPage() {
                     { label: "Password", key: "password", type: "password", required: true },
                   ].map(({ label, key, type, required }) => (
                     <div key={key}>
-                      <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">{label} *</label>
+                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label} *</label>
                       <input required={required} type={type || "text"} value={form[key] || ""} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                        className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E] transition" />
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary" />
                     </div>
                   ))}
                   <div>
-                    <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">Batch *</label>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Batch *</label>
                     <select required value={form.batchId || ""} onChange={(e) => setForm({ ...form, batchId: e.target.value })}
-                      className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E]">
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary">
                       <option value="">Select batch</option>
                       {batches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">Admission Date *</label>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admission Date *</label>
                     <input required type="date" value={form.admissionDate || ""} onChange={(e) => setForm({ ...form, admissionDate: e.target.value })}
-                      className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E]" />
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary" />
                   </div>
                 </>
               )}
@@ -400,19 +395,19 @@ export default function StudentsPage() {
                 { label: "Address", key: "address" },
               ].map(({ label, key, required }) => (
                 <div key={key}>
-                  <label className="block text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-1.5">{label} {required && "*"}</label>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label} {required && "*"}</label>
                   <input
                     required={required}
                     type="text"
                     value={form[key] || ""}
                     onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                    className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] placeholder-[#71717A] outline-none focus:border-[#22C55E] transition"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary"
                   />
                 </div>
               ))}
               <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-sm text-[#71717A] hover:text-[#F2F2F2] transition">Cancel</button>
-                <button type="submit" disabled={submitting} className="px-4 py-2 bg-[#22C55E] text-[#052E16] text-sm font-bold rounded-lg hover:bg-[#16A34A] transition disabled:opacity-50">
+                <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-sm text-muted-foreground transition hover:text-foreground">Cancel</button>
+                <button type="submit" disabled={submitting} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50">
                   {submitting ? "Saving..." : modal === "create" ? "Enroll Student" : "Save Changes"}
                 </button>
               </div>

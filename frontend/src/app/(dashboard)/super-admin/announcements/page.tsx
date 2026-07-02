@@ -16,8 +16,18 @@ const ANNOUNCEMENT_TYPES = [
   { value: "MAINTENANCE", label: "Maintenance" },
 ] as const;
 
+type AnnouncementItem = {
+  id: string;
+  title?: string;
+  message?: string;
+  type?: string;
+  audience?: string;
+  createdAt?: string | Date;
+  isRead?: boolean;
+};
+
 export default function AnnouncementsPage() {
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(false);
@@ -41,10 +51,12 @@ export default function AnnouncementsPage() {
     setLoading(true);
     try {
       const res = await getAllNotifications({ limit: 100 });
-      const items = (res?.data || []).filter((item: any) => {
-        const type = String(item.type || "").toUpperCase();
+      const items = (res?.data || []).filter((item: unknown) => {
+        if (!item || typeof item !== "object") return false;
+        const record = item as Partial<AnnouncementItem>;
+        const type = String(record.type || "").toUpperCase();
         return ["ANNOUNCEMENT", "REMINDER", "MAINTENANCE"].includes(type);
-      });
+      }) as AnnouncementItem[];
       setAnnouncements(items);
     } catch {
       showToast("Failed to load announcements", "error");
@@ -54,7 +66,18 @@ export default function AnnouncementsPage() {
   }, []);
 
   useEffect(() => {
-    void load();
+    let isMounted = true;
+
+    const run = async () => {
+      if (!isMounted) return;
+      await load();
+    };
+
+    void run();
+
+    return () => {
+      isMounted = false;
+    };
   }, [load]);
 
   const filteredAnnouncements = useMemo(() => {
@@ -83,8 +106,8 @@ export default function AnnouncementsPage() {
       setModal(false);
       setForm({ title: "", message: "", type: "ANNOUNCEMENT", audience: "All users" });
       void load();
-    } catch (error: any) {
-      const message = error?.response?.data?.message || "Failed to post announcement";
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to post announcement";
       await swalError({ title: "Announcement failed", text: message });
       showToast(message, "error");
     } finally {
@@ -172,7 +195,7 @@ export default function AnnouncementsPage() {
                   <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{item.message}</p>
                 </div>
                 <div className="text-right text-xs text-muted-foreground">
-                  <p>{new Date(item.createdAt || Date.now()).toLocaleString()}</p>
+                  <p>{item.createdAt ? new Date(item.createdAt).toLocaleString() : "—"}</p>
                   <div className="mt-3 flex gap-2">
                     {!item.isRead && (
                       <button
