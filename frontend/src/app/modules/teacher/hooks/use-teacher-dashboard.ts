@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { teacherService, type TeacherDashboardOverview } from "../services/teacherService";
+import { teacherService, type TeacherDashboardOverview } from "../services/teacher-service";
 
 export function useTeacherDashboard() {
   const [overview, setOverview] = useState<TeacherDashboardOverview | null>(null);

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { useTeacherDashboard } from "../hooks/useTeacherDashboard";
-import { ContentSkeleton } from "./contentSkeleton";
+import { useTeacherDashboard } from "../hooks/use-teacher-dashboard";
+import { ContentSkeleton } from "./ContentSkeleton";
 
 export function DashboardOverview() {
   const { overview, loading } = useTeacherDashboard();

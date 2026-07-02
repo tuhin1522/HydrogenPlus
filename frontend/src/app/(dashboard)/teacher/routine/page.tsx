@@ -1,4 +1,4 @@
-import { PageShell } from "../../../modules/teacher/components/pageShell";
+import { PageShell } from "../../../modules/teacher/components/PageShell";
 
 const routine = [
   { day: "Monday", session: "09:00 - 10:30", batch: "Batch A", subject: "Physics" },

@@ -1,4 +1,4 @@
-import { PageShell } from "../../../modules/teacher/components/pageShell";
+import { PageShell } from "../../../modules/teacher/components/PageShell";
 
 const subjects = [
   { name: "Physics", classLevel: "Class 10", batch: "Batch A", students: 34 },

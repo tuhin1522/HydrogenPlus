@@ -34,12 +34,32 @@ export function TeacherShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState<TeacherUser | null>(null);
+  const [user] = useState<TeacherUser | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const token = window.localStorage.getItem("token");
+    const rawUser = window.localStorage.getItem("user");
+
+    if (!token || !rawUser) {
+      return null;
+    }
+
+    try {
+      const parsedUser = JSON.parse(rawUser) as TeacherUser;
+      return parsedUser.role === "TEACHER" ? parsedUser : null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
-    setMounted(true);
+    if (typeof window === "undefined") {
+      return;
+    }
+
     const token = window.localStorage.getItem("token");
     const rawUser = window.localStorage.getItem("user");
 
@@ -52,9 +72,7 @@ export function TeacherShell({ children }: { children: ReactNode }) {
       const parsedUser = JSON.parse(rawUser) as TeacherUser;
       if (parsedUser.role !== "TEACHER") {
         router.push(parsedUser.role === "STUDENT" ? "/student" : "/login");
-        return;
       }
-      setUser(parsedUser);
     } catch {
       router.push("/login");
     }
@@ -83,7 +101,7 @@ export function TeacherShell({ children }: { children: ReactNode }) {
     }
   };
 
-  if (!mounted || !user) {
+  if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

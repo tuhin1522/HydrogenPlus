@@ -1,5 +1,5 @@
-import { PageShell } from "../../../modules/teacher/components/pageShell";
-import { EmptyState } from "../../../modules/teacher/components/emptyState";
+import { PageShell } from "../../../modules/teacher/components/PageShell";
+import { EmptyState } from "../../../modules/teacher/components/EmptyState";
 
 const courses = [
   { title: "Physics Crash Course", status: "Published", batch: "Batch A", price: "$49" },

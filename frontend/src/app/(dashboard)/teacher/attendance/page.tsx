@@ -1,4 +1,4 @@
-import { PageShell } from "../../../modules/teacher/components/pageShell";
+import { PageShell } from "../../../modules/teacher/components/PageShell";
 
 export default function TeacherAttendancePage() {
   return (
