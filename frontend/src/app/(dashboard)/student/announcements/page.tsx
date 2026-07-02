@@ -1,4 +1,4 @@
-import { ModulePage } from "@/app/modules/students/components/modulePage";
+import { ModulePage } from "@/app/modules/students/components/ModulePage";
 
 export default function StudentAnnouncementsPage() {
   return (
