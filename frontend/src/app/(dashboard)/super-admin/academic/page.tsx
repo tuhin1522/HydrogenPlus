@@ -87,6 +87,14 @@ export default function AcademicManagementPage() {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    loadMeta();
+  }, [loadMeta]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   const openEdit = (item: any) => {
     setForm({ ...item });
     setEditingId(item.id);
@@ -156,44 +164,54 @@ export default function AcademicManagementPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F2F2F2]">Academic Management</h1>
-          <p className="text-sm text-[#71717A] mt-1">Manage classes, subjects, batches, and assignments</p>
+          <h1 className="text-2xl font-bold text-foreground">Academic Management</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage classes, subjects, batches, and assignments</p>
         </div>
+        <button
+          onClick={() => {
+            setForm({});
+            setModal("create");
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary/90 transition"
+        >
+          <span>+</span>
+          <span>Add New</span>
+        </button>
       </div>
 
-      <div className="flex border-b border-[#1C1917] overflow-x-auto">
+      <div className="flex border-b border-border overflow-x-auto">
         {(Object.keys(tabLabels) as Tab[]).map((tab) => (
           <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${activeTab === tab ? "border-[#22C55E] text-[#F2F2F2]" : "border-transparent text-[#71717A] hover:text-[#A1A1AA]"}`}>
+            className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${activeTab === tab ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
             {tabLabels[tab]}
           </button>
         ))}
       </div>
 
-      <div className="rounded-xl border border-[#1C1917] bg-[#111010] overflow-x-auto">
+      <div className="rounded-xl border border-border bg-card overflow-x-auto">
         <table className="w-full text-sm min-w-[600px]">
           <thead>
-            <tr className="border-b border-[#1C1917] text-[#71717A] text-xs">
+            <tr className="border-b border-border text-muted-foreground text-xs">
               {activeTab === "classes" && <><th className="px-5 py-3 text-left font-medium uppercase">Name</th><th className="px-5 py-3 text-right font-medium uppercase">Actions</th></>}
               {activeTab === "subjects" && <><th className="px-5 py-3 text-left font-medium uppercase">Name</th><th className="px-5 py-3 text-left font-medium uppercase">Code</th><th className="px-5 py-3 text-left font-medium uppercase">Class</th><th className="px-5 py-3 text-right font-medium uppercase">Actions</th></>}
               {activeTab === "batches" && <><th className="px-5 py-3 text-left font-medium uppercase">Name</th><th className="px-5 py-3 text-left font-medium uppercase">Branch</th><th className="px-5 py-3 text-left font-medium uppercase">Capacity</th><th className="px-5 py-3 text-left font-medium uppercase">Status</th><th className="px-5 py-3 text-right font-medium uppercase">Actions</th></>}
               {activeTab === "batch-subjects" && <><th className="px-5 py-3 text-left font-medium uppercase">Batch</th><th className="px-5 py-3 text-left font-medium uppercase">Subject</th><th className="px-5 py-3 text-left font-medium uppercase">Teacher</th><th className="px-5 py-3 text-right font-medium uppercase">Actions</th></>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#1C1917]">
+          <tbody className="divide-y divide-border">
             {loading ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <tr key={i}><td colSpan={6} className="px-5 py-4"><div className="h-4 bg-[#1C1917] rounded animate-pulse" /></td></tr>
+                <tr key={i}><td colSpan={6} className="px-5 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
               ))
             ) : data.length === 0 ? (
-              <tr><td colSpan={6} className="px-5 py-16 text-center text-[#71717A]">No records found.</td></tr>
+              <tr><td colSpan={6} className="px-5 py-16 text-center text-muted-foreground">No records found.</td></tr>
             ) : (
               data.map((item) => (
-                <tr key={item.id} className="hover:bg-[#1C1917]/20">
-                  {activeTab === "classes" && <><td className="px-5 py-4 font-medium text-[#F2F2F2]">{item.name}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
-                  {activeTab === "subjects" && <><td className="px-5 py-4 text-[#F2F2F2]">{item.name}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.code || "—"}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.classLevel?.name || "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
-                  {activeTab === "batches" && <><td className="px-5 py-4 text-[#F2F2F2]">{item.name}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.branch?.name || "—"}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.capacity}</td><td className="px-5 py-4"><StatusBadge status={item.status} /></td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
-                  {activeTab === "batch-subjects" && <><td className="px-5 py-4 text-[#F2F2F2]">{item.batch?.name || "—"}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.subject?.name || "—"}</td><td className="px-5 py-4 text-[#A1A1AA]">{item.teacher?.user?.name || "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
+                <tr key={item.id} className="hover:bg-muted/50">
+                  {activeTab === "classes" && <><td className="px-5 py-4 font-medium text-foreground">{item.name}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
+                  {activeTab === "subjects" && <><td className="px-5 py-4 text-foreground">{item.name}</td><td className="px-5 py-4 text-muted-foreground">{item.code || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.classLevel?.name || "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
+                  {activeTab === "batches" && <><td className="px-5 py-4 text-foreground">{item.name}</td><td className="px-5 py-4 text-muted-foreground">{item.branch?.name || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.capacity}</td><td className="px-5 py-4"><StatusBadge status={item.status} /></td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
+                  {activeTab === "batch-subjects" && <><td className="px-5 py-4 text-foreground">{item.batch?.name || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.subject?.name || "—"}</td><td className="px-5 py-4 text-muted-foreground">{item.teacher?.user?.name || "—"}</td><td className="px-5 py-4 text-right"><ActionButtons onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} /></td></>}
                 </tr>
               ))
             )}
@@ -202,11 +220,11 @@ export default function AcademicManagementPage() {
       </div>
 
       {modal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111010] border border-[#1C1917] w-full max-w-md rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-[#1C1917] flex justify-between items-center sticky top-0 bg-[#111010]">
-              <h3 className="font-bold text-[#F2F2F2]">{modal === "edit" ? "Edit" : "Create"} {tabLabels[activeTab]}</h3>
-              <button onClick={() => setModal(null)} className="text-[#71717A]">✕</button>
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border w-full max-w-md rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card">
+              <h3 className="font-bold text-foreground">{modal === "edit" ? "Edit" : "Create"} {tabLabels[activeTab]}</h3>
+              <button onClick={() => setModal(null)} className="text-muted-foreground hover:text-foreground">✕</button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               {activeTab === "classes" && (
@@ -240,8 +258,8 @@ export default function AcademicManagementPage() {
                 </>
               )}
               <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-sm text-[#71717A]">Cancel</button>
-                <button type="submit" disabled={submitting} className="px-4 py-2 bg-[#22C55E] text-[#052E16] text-sm font-bold rounded-lg disabled:opacity-50">
+                <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">Cancel</button>
+                <button type="submit" disabled={submitting} className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg disabled:opacity-50 hover:bg-primary/90">
                   {submitting ? "Saving..." : "Save"}
                 </button>
               </div>
@@ -256,15 +274,15 @@ export default function AcademicManagementPage() {
 function ActionButtons({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
   return (
     <>
-      <button onClick={onEdit} className="px-3 py-1 text-xs border border-[#27272A] text-[#A1A1AA] rounded-lg hover:text-[#22C55E] mr-2">Edit</button>
-      <button onClick={onDelete} className="px-3 py-1 text-xs border border-[#27272A] text-[#A1A1AA] rounded-lg hover:text-[#EF4444]">Delete</button>
+      <button onClick={onEdit} className="px-3 py-1 text-xs border border-border text-muted-foreground rounded-lg hover:text-primary mr-2">Edit</button>
+      <button onClick={onDelete} className="px-3 py-1 text-xs border border-border text-muted-foreground rounded-lg hover:text-destructive">Delete</button>
     </>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${status === "ACTIVE" ? "bg-[#22C55E]/10 text-[#22C55E]" : "bg-[#EF4444]/10 text-[#EF4444]"}`}>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${status === "ACTIVE" ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
       {status}
     </span>
   );
@@ -273,9 +291,9 @@ function StatusBadge({ status }: { status: string }) {
 function Field({ label, value, onChange, required, type = "text" }: { label: string; value: string; onChange: (v: string) => void; required?: boolean; type?: string }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-[#71717A] uppercase mb-1.5">{label}{required ? " *" : ""}</label>
+      <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">{label}{required ? " *" : ""}</label>
       <input required={required} type={type} value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E]" />
+        className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
     </div>
   );
 }
@@ -283,9 +301,9 @@ function Field({ label, value, onChange, required, type = "text" }: { label: str
 function SelectField({ label, value, onChange, options, required }: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; required?: boolean }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-[#71717A] uppercase mb-1.5">{label}{required ? " *" : ""}</label>
+      <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">{label}{required ? " *" : ""}</label>
       <select required={required} value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-[#0D0B0A] border border-[#1C1917] rounded-lg px-3 py-2.5 text-sm text-[#F2F2F2] outline-none focus:border-[#22C55E]">
+        className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary">
         <option value="">Select...</option>
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
