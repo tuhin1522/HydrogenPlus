@@ -30,37 +30,49 @@ const navItems = [
   { label: "Settings", href: "/student/settings", icon: "⚙️" },
 ];
 
+function readStoredStudentUser(): StudentUser | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const token = window.localStorage.getItem("token");
+  const rawUser = window.localStorage.getItem("user");
+
+  if (!token || !rawUser) {
+    return null;
+  }
+
+  try {
+    const parsedUser = JSON.parse(rawUser) as StudentUser;
+    return parsedUser.role === "STUDENT" ? parsedUser : null;
+  } catch {
+    return null;
+  }
+}
+
 export function StudentShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user] = useState<StudentUser | null>(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    const token = window.localStorage.getItem("token");
-    const rawUser = window.localStorage.getItem("user");
-
-    if (!token || !rawUser) {
-      return null;
-    }
-
-    try {
-      const parsedUser = JSON.parse(rawUser) as StudentUser;
-      return parsedUser.role === "STUDENT" ? parsedUser : null;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState<StudentUser | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
+    setUser(readStoredStudentUser());
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
     if (!user) {
       router.push("/login");
       return;
     }
-  }, [router, user]);
+  }, [router, user, isHydrated]);
 
   const title = useMemo(() => {
     const match = navItems.find((item) => item.href === pathname);
@@ -85,7 +97,7 @@ export function StudentShell({ children }: { children: React.ReactNode }) {
     }
   };
 
-  if (!user) {
+  if (!isHydrated || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { studentService } from "@/app/modules/students/services/student-service";
+import { studentService } from "@/app/modules/students/services/student.service";
 import type { StudentDashboardOverview } from "@/app/modules/students/types";
 
 export function useStudentDashboardOverview() {
