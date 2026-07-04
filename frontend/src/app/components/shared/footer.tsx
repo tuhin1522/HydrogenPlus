@@ -1,17 +1,17 @@
 import Link from "next/link";
 
 const quickLinks = [
-  { label: "About us", href: "#about" },
-  { label: "Programs", href: "#programs" },
-  { label: "Results", href: "#results" },
-  { label: "Contact", href: "#contact" },
+  { label: "About us", href: "/about" },
+  { label: "Branches", href: "/branches" },
+  { label: "Exams", href: "/exams" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const supportLinks = [
-  { label: "Admission Help", href: "#help" },
-  { label: "FAQ", href: "#faq" },
-  { label: "Privacy Policy", href: "#privacy" },
-  { label: "Terms", href: "#terms" },
+  { label: "Admission Help", href: "/contact" },
+  { label: "FAQ", href: "/about" },
+  { label: "Privacy Policy", href: "/about" },
+  { label: "Terms", href: "/about" },
 ];
 
 export default function Footer() {
