@@ -16,27 +16,11 @@ type UserProfile = {
 };
 
 const desktopMenu: NavItem[] = [
-  { label: "Home", href: "#home" },
-  {
-    label: "Courses",
-    items: ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12"],
-  },
-  { label: "Branches", href: "#branches" },
-  {
-    label: "Features",
-    items: [
-      "Student Management",
-      "Teacher Management",
-      "Online Exams",
-      "Routine Management",
-      "Analytics",
-      "Payments",
-    ],
-  },
-  { label: "Exams", href: "#exams" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "About Us", href: "#about" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "Branches", href: "/branches" },
+  { label: "Exams", href: "/exams" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
