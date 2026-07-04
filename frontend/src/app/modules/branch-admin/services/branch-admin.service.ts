@@ -1,25 +1,5 @@
 import axiosInstance from "@/app/services/axiosInstance";
-
-export interface BranchAdminDashboardData {
-  stats: {
-    totalStudents: number;
-    totalTeachers: number;
-    totalBatches: number;
-    activeCourses: number;
-    todaysClasses: number;
-    monthlyRevenue: string;
-  };
-  recentAdmissions: Array<{
-    id: number;
-    name: string;
-    details: string;
-  }>;
-  recentPayments: Array<{
-    id: number;
-    label: string;
-    amount: string;
-  }>;
-}
+import { BranchAdminDashboardData } from "../type";
 
 export const branchAdminService = {
   async getDashboardOverview(): Promise<BranchAdminDashboardData> {
@@ -42,7 +22,22 @@ export const branchAdminService = {
     return data;
   },
 
-  async createStudent(data: Record<string, unknown>) {
+  async getBatches() {
+    const { data } = await axiosInstance.get("/batches");
+    return data;
+  },
+
+  async getBranches() {
+    const { data } = await axiosInstance.get("/branches/all-branches");
+    return data;
+  },
+
+  async createUser(data: Record<string, unknown>) {
+    const response = await axiosInstance.post("/system/users", data);
+    return response.data;
+  },
+
+  async createStudentProfile(data: Record<string, unknown>) {
     const response = await axiosInstance.post("/students/create-student-profile", data);
     return response.data;
   },

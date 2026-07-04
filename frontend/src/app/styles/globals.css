@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@plugin 'tailwindcss-animate';
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
@@ -144,6 +143,40 @@
   .reading-width {
     max-width: 56rem;
   }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    transform: scale(0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.animate-in {
+  animation-fill-mode: both;
+}
+
+.fade-in {
+  animation-name: fade-in;
+  animation-duration: 200ms;
+  animation-timing-function: ease-out;
+}
+
+.zoom-in {
+  animation-name: zoom-in;
+  animation-duration: 200ms;
+  animation-timing-function: ease-out;
 }
 
 ::-webkit-scrollbar {

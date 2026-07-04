@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import { branchAdminService } from "../../../modules/branch-admin/services/branch-admin.service";
 
 type Student = {
@@ -41,11 +43,20 @@ export default function StudentsPage() {
   const [page, setPage] = useState(1);
   const perPage = 10;
 
-  // Form state for admitting a student
   const [form, setForm] = useState({
-    userId: "", firstName: "", lastName: "", classLevelId: "",
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    batchId: "",
+    guardianName: "",
+    guardianPhone: "",
+    schoolName: "",
+    address: "",
+    admissionDate: new Date().toISOString().slice(0, 10),
   });
   const [classLevels, setClassLevels] = useState<any[]>([]);
+  const [batches, setBatches] = useState<any[]>([]);
 
   const loadStudents = useCallback(async () => {
     try {
@@ -67,33 +78,76 @@ export default function StudentsPage() {
       void branchAdminService.getClassLevels().then((r) => {
         setClassLevels(r?.classLevels || r?.data || []);
       }).catch(() => {});
+      void branchAdminService.getBatches().then((r) => {
+        setBatches(r?.batches || r?.data || []);
+      }).catch(() => {});
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
   }, [loadStudents]);
 
+  const showToast = (msg: string, type: "success" | "error" = "success") => {
+    if (type === "error") toast.error(msg);
+    else toast.success(msg);
+  };
+
   const handleAdmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSubmitting(true);
-      await branchAdminService.createStudent(form);
+      const userRes = await branchAdminService.createUser({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+        role: "STUDENT",
+      });
+      await branchAdminService.createStudentProfile({
+        userId: userRes.data.id,
+        batchId: form.batchId,
+        guardianName: form.guardianName,
+        guardianPhone: form.guardianPhone,
+        schoolName: form.schoolName || null,
+        address: form.address || null,
+        admissionDate: form.admissionDate || new Date().toISOString(),
+      });
+      await swalSuccess({ title: "Student enrolled", text: "The student profile was created successfully." });
+      showToast("Student enrolled!");
       setAddModalOpen(false);
-      setForm({ userId: "", firstName: "", lastName: "", classLevelId: "" });
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        batchId: "",
+        guardianName: "",
+        guardianPhone: "",
+        schoolName: "",
+        address: "",
+        admissionDate: new Date().toISOString().slice(0, 10),
+      });
       await loadStudents();
     } catch (e: any) {
-      alert(e?.response?.data?.message || "Failed to admit student.");
+      const message = e?.response?.data?.message || "Failed to admit student.";
+      await swalError({ title: "Operation failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this student? This cannot be undone.")) return;
+    const confirmed = await swalConfirm({ title: "Delete this student profile?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     try {
       await branchAdminService.deleteStudent(id);
+      await swalSuccess({ title: "Student deleted", text: "The student profile was removed successfully." });
+      showToast("Student deleted.");
       await loadStudents();
     } catch (e: any) {
-      alert(e?.response?.data?.message || "Failed to delete.");
+      const message = e?.response?.data?.message || "Failed to delete.";
+      await swalError({ title: "Delete failed", text: message });
+      showToast(message, "error");
     }
   };
 
@@ -152,7 +206,7 @@ export default function StudentsPage() {
             onClick={() => setAddModalOpen(true)}
             className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition"
           >
-            + Admit Student
+            + Enroll Student
           </button>
         </div>
       </div>
@@ -295,33 +349,45 @@ export default function StudentsPage() {
 
       {/* Admit Student Modal */}
       {addModalOpen && (
-        <Modal title="Admit New Student" onClose={() => setAddModalOpen(false)}>
+        <Modal title="Enroll Student" onClose={() => setAddModalOpen(false)}>
           <form className="space-y-4" onSubmit={handleAdmit}>
-            <div>
-              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">User ID (existing account) *</label>
-              <input required type="text" placeholder="User UUID" value={form.userId} onChange={(e) => setForm({ ...form, userId: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">First Name *</label>
-                <input required type="text" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
+            {[
+              { label: "Name", key: "name", required: true },
+              { label: "Email", key: "email", type: "email", required: true },
+              { label: "Phone", key: "phone", required: true },
+              { label: "Password", key: "password", type: "password", required: true },
+            ].map(({ label, key, type, required }) => (
+              <div key={key}>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">{label} *</label>
+                <input required={required} type={type || "text"} value={(form as any)[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Last Name *</label>
-                <input required type="text" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
-              </div>
-            </div>
+            ))}
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Class Level *</label>
-              <select required value={form.classLevelId} onChange={(e) => setForm({ ...form, classLevelId: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
-                <option value="">Select class...</option>
-                {classLevels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Batch *</label>
+              <select required value={form.batchId} onChange={(e) => setForm({ ...form, batchId: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+                <option value="">Select batch</option>
+                {batches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
+            </div>
+            {[
+              { label: "Guardian Name", key: "guardianName", required: true },
+              { label: "Guardian Phone", key: "guardianPhone", required: true },
+              { label: "School/College Name", key: "schoolName" },
+              { label: "Address", key: "address" },
+            ].map(({ label, key, required }) => (
+              <div key={key}>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">{label} {required && '*'}</label>
+                <input required={required} type="text" value={(form as any)[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
+              </div>
+            ))}
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Admission Date *</label>
+              <input required type="date" value={form.admissionDate} onChange={(e) => setForm({ ...form, admissionDate: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
             </div>
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setAddModalOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">Cancel</button>
               <button type="submit" disabled={submitting} className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50">
-                {submitting ? "Admitting..." : "Admit Student"}
+                {submitting ? "Enrolling..." : "Enroll Student"}
               </button>
             </div>
           </form>
