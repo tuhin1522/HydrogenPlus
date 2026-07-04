@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { toast } from "sonner";
+import { swalConfirm, swalError, swalSuccess } from "@/app/lib/swal";
 import { branchAdminService } from "../../../modules/branch-admin/services/branch-admin.service";
 
 type Teacher = {
@@ -27,7 +29,8 @@ export default function TeachersPage() {
   const [search, setSearch] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ userId: "", firstName: "", lastName: "", phone: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", branchId: "", qualification: "", experience: "", specialization: "", bio: "" });
+  const [branches, setBranches] = useState<any[]>([]);
 
   const loadTeachers = useCallback(async () => {
     try {
@@ -43,34 +46,63 @@ export default function TeachersPage() {
     }
   }, []);
 
-  useState(() => {
+  useEffect(() => {
     void loadTeachers();
-  });
+    void branchAdminService.getBranches().then((r) => {
+      setBranches(r?.branches || r?.data || []);
+    }).catch(() => {});
+  }, [loadTeachers]);
+
+  const showToast = (msg: string, type: "success" | "error" = "success") => {
+    if (type === "error") toast.error(msg);
+    else toast.success(msg);
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSubmitting(true);
-      await branchAdminService.createTeacher(form);
+      const userRes = await branchAdminService.createUser({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+        role: "TEACHER",
+      });
+      await branchAdminService.createTeacher({
+        userId: userRes.data.id,
+        branchId: form.branchId,
+        qualification: form.qualification || null,
+        experience: form.experience ? Number(form.experience) : null,
+        specialization: form.specialization || null,
+        bio: form.bio || null,
+      });
+      await swalSuccess({ title: "Teacher created", text: "The teacher account was created successfully." });
+      showToast("Teacher created!");
       setAddModalOpen(false);
-      setForm({ userId: "", firstName: "", lastName: "", phone: "" });
+      setForm({ name: "", email: "", phone: "", password: "", branchId: "", qualification: "", experience: "", specialization: "", bio: "" });
       await loadTeachers();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to add teacher.";
-      alert(message);
+      await swalError({ title: "Operation failed", text: message });
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Remove this teacher? This cannot be undone.")) return;
+    const confirmed = await swalConfirm({ title: "Delete this teacher profile?", text: "This action cannot be undone." });
+    if (!confirmed) return;
     try {
       await branchAdminService.deleteTeacher(id);
+      await swalSuccess({ title: "Teacher deleted", text: "The teacher profile was removed successfully." });
+      showToast("Teacher deleted.");
       await loadTeachers();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to delete.";
-      alert(message);
+      await swalError({ title: "Delete failed", text: message });
+      showToast(message, "error");
     }
   };
 
@@ -244,32 +276,43 @@ export default function TeachersPage() {
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 bg-card">
-              <h2 className="text-lg font-bold text-foreground">Add New Teacher</h2>
+              <h2 className="text-lg font-bold text-foreground">Create Teacher</h2>
               <button onClick={() => setAddModalOpen(false)} className="text-muted-foreground hover:text-foreground text-xl">✕</button>
             </div>
             <form className="p-6 space-y-4" onSubmit={handleCreate}>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">User ID (existing account) *</label>
-                <input required type="text" placeholder="User UUID" value={form.userId} onChange={(e) => setForm({ ...form, userId: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">First Name *</label>
-                  <input required type="text" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
+              {[
+                { label: "Full Name", key: "name", required: true },
+                { label: "Email", key: "email", type: "email", required: true },
+                { label: "Phone", key: "phone", required: true },
+                { label: "Password", key: "password", type: "password", required: true },
+              ].map(({ label, key, type, required }) => (
+                <div key={key}>
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">{label} *</label>
+                  <input required={required} type={type || "text"} value={(form as any)[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Last Name *</label>
-                  <input required type="text" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
-                </div>
-              </div>
+              ))}
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Phone</label>
-                <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Branch *</label>
+                <select required value={form.branchId} onChange={(e) => setForm({ ...form, branchId: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+                  <option value="">Select branch</option>
+                  {branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                </select>
               </div>
+              {[
+                { label: "Qualification", key: "qualification" },
+                { label: "Experience", key: "experience", type: "number" },
+                { label: "Specialization", key: "specialization" },
+                { label: "Bio", key: "bio" },
+              ].map(({ label, key, type }) => (
+                <div key={key}>
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">{label}</label>
+                  <input type={type || "text"} value={(form as any)[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary" />
+                </div>
+              ))}
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setAddModalOpen(false)} className="px-4 py-2 text-sm text-muted-foreground">Cancel</button>
                 <button type="submit" disabled={submitting} className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50">
-                  {submitting ? "Adding..." : "Add Teacher"}
+                  {submitting ? "Creating..." : "Create Teacher"}
                 </button>
               </div>
             </form>

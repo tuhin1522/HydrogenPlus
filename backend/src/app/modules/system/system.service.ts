@@ -66,6 +66,10 @@ const createUser = async (
     throw new AppError(httpStatus.FORBIDDEN, "SUPER_ADMIN accounts cannot be created via API.");
   }
 
+  if (payload.role === UserRole.BRANCH_ADMIN) {
+    throw new AppError(httpStatus.FORBIDDEN, "BRANCH_ADMIN accounts cannot be created via this endpoint.");
+  }
+
   const existing = await prisma.user.findUnique({ where: { email: payload.email } });
   if (existing) throw new AppError(httpStatus.CONFLICT, "Email already registered.");
 

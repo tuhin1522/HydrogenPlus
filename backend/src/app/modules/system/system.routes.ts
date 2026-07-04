@@ -12,7 +12,7 @@ router.get("/users", checkAuth(UserRole.SUPER_ADMIN), systemController.getAllUse
 router.get("/users/:id", checkAuth(UserRole.SUPER_ADMIN), systemController.getUserById);
 router.post(
   "/users",
-  checkAuth(UserRole.SUPER_ADMIN),
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN),
   validateRequest(SystemValidation.createUserZodSchema),
   systemController.createUser
 );
