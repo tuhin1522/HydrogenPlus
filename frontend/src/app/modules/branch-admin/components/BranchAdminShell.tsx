@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { Header } from "@/app/modules/super-admin/components/Header";
 
 const MENU_ITEMS = [
   { id: "overview", label: "Dashboard", icon: "📊", path: "/branch-admin/overview" },
@@ -62,6 +63,9 @@ export function BranchAdminShell({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("user");
     router.push("/login");
   }, [router]);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showNotifications, setShowNotifications] = useState(false);
 
   if (!mounted || !user) {
     return (
@@ -150,23 +154,14 @@ export function BranchAdminShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 border-b border-border bg-card/80 backdrop-blur-sm px-6 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Branch Admin</span>
-            <span>/</span>
-            <span className="text-foreground font-medium capitalize">
-              {MENU_ITEMS.find((m) => activeSection === m.id)?.label || "Dashboard"}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs border border-primary/20 font-medium">
-              Branch Admin
-            </span>
-            <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs">
-              {user.name?.charAt(0)?.toUpperCase() || "B"}
-            </div>
-          </div>
-        </header>
+        <Header
+          activeTab={MENU_ITEMS.find((m) => activeSection === m.id)?.label || "Dashboard"}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          showNotifications={showNotifications}
+          setShowNotifications={setShowNotifications}
+          user={user}
+        />
 
         <main className="flex-1 overflow-y-auto bg-background">{children}</main>
       </div>
