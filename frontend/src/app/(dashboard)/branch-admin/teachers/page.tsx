@@ -11,6 +11,10 @@ type Teacher = {
   lastName?: string;
   phone?: string;
   user?: { name?: string; email?: string };
+  qualification?: string;
+  experience?: number;
+  specialization?: string;
+  bio?: string;
   batchSubjects?: { subject?: { name?: string }; batch?: { name?: string } }[];
 };
 
@@ -31,6 +35,22 @@ export default function TeachersPage() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", branchId: "", qualification: "", experience: "", specialization: "", bio: "" });
   const [branches, setBranches] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [batchesList, setBatchesList] = useState<any[]>([]);
+
+  const [selectedTeacher, setSelectedTeacher] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedBatch, setSelectedBatch] = useState("");
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [selectedTeacherProfile, setSelectedTeacherProfile] = useState<Teacher | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    id: "",
+    qualification: "",
+    experience: "",
+    specialization: "",
+    bio: "",
+  });
 
   const loadTeachers = useCallback(async () => {
     try {
@@ -51,6 +71,8 @@ export default function TeachersPage() {
     void branchAdminService.getBranches().then((r) => {
       setBranches(r?.branches || r?.data || []);
     }).catch(() => {});
+    void branchAdminService.getSubjects().then((r) => setSubjects(r?.subjects || r?.data || [])).catch(() => {});
+    void branchAdminService.getBatches().then((r) => setBatchesList(r?.batches || r?.data || [])).catch(() => {});
   }, [loadTeachers]);
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
@@ -103,6 +125,69 @@ export default function TeachersPage() {
       const message = error instanceof Error ? error.message : "Failed to delete.";
       await swalError({ title: "Delete failed", text: message });
       showToast(message, "error");
+    }
+  };
+
+  const openTeacherProfile = (teacher: Teacher) => {
+    setSelectedTeacherProfile(teacher);
+    setProfileModalOpen(true);
+  };
+
+  const openTeacherEdit = (teacher: Teacher) => {
+    setSelectedTeacherProfile(teacher);
+    setEditForm({
+      id: teacher.id,
+      qualification: teacher.qualification || "",
+      experience: teacher.experience?.toString() || "",
+      specialization: teacher.specialization || "",
+      bio: teacher.bio || "",
+    });
+    setProfileModalOpen(false);
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateTeacher = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSubmitting(true);
+
+      const payload: Record<string, unknown> = {};
+
+      if (editForm.qualification.trim()) {
+        payload.qualification = editForm.qualification.trim();
+      } else {
+        payload.qualification = null;
+      }
+
+      if (editForm.experience.trim()) {
+        payload.experience = Number(editForm.experience);
+      } else {
+        payload.experience = null;
+      }
+
+      if (editForm.specialization.trim()) {
+        payload.specialization = editForm.specialization.trim();
+      } else {
+        payload.specialization = null;
+      }
+
+      if (editForm.bio.trim()) {
+        payload.bio = editForm.bio.trim();
+      } else {
+        payload.bio = null;
+      }
+
+      await branchAdminService.updateTeacher(editForm.id, payload);
+      await swalSuccess({ title: "Teacher updated", text: "The teacher profile was updated successfully." });
+      showToast("Teacher profile updated!");
+      setEditModalOpen(false);
+      await loadTeachers();
+    } catch (e: any) {
+      const message = e?.response?.data?.message || "Failed to update teacher.";
+      await swalError({ title: "Update failed", text: message });
+      showToast(message, "error");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -186,7 +271,8 @@ export default function TeachersPage() {
                       </p>
                     </div>
                     <div className="mt-4 flex gap-2 pt-4 border-t border-border">
-                      <button className="flex-1 py-1.5 text-xs border border-border rounded-lg text-muted-foreground hover:text-primary hover:border-primary transition">Profile</button>
+                      <button onClick={() => openTeacherProfile(teacher)} className="flex-1 py-1.5 text-xs border border-border rounded-lg text-muted-foreground hover:text-primary hover:border-primary transition">Profile</button>
+                      <button onClick={() => openTeacherEdit(teacher)} className="flex-1 py-1.5 text-xs border border-border rounded-lg text-muted-foreground hover:text-primary hover:border-primary transition">Edit</button>
                       <button onClick={() => handleDelete(teacher.id)} className="flex-1 py-1.5 text-xs border border-destructive/30 rounded-lg text-destructive/70 hover:text-destructive hover:border-destructive transition">Remove</button>
                     </div>
                   </div>
@@ -206,11 +292,57 @@ export default function TeachersPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <label className="block text-xs font-semibold text-muted-foreground uppercase">Select Teacher</label>
-              <select className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+              <select value={selectedTeacher} onChange={(e) => setSelectedTeacher(e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
                 <option value="">Select teacher...</option>
                 {teachers.map((t) => <option key={t.id} value={t.id}>{getName(t)}</option>)}
               </select>
-              <button className="w-full bg-primary text-primary-foreground py-2 rounded-lg text-sm font-bold hover:bg-primary/90 transition">Save Assignment</button>
+
+              <label className="block text-xs font-semibold text-muted-foreground uppercase">Select Subject</label>
+              <select value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+                <option value="">Select subject...</option>
+                {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+
+              <label className="block text-xs font-semibold text-muted-foreground uppercase">Select Batch</label>
+              <select value={selectedBatch} onChange={(e) => setSelectedBatch(e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+                <option value="">Select batch...</option>
+                {batchesList.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+
+              <button onClick={async () => {
+                if (!selectedTeacher || !selectedSubject || !selectedBatch) {
+                  await swalError({ title: "Missing selection", text: "Please select teacher, subject and batch." });
+                  return;
+                }
+                try {
+                  setSubmitting(true);
+                  await branchAdminService.createBatchSubject({ teacherId: selectedTeacher, subjectId: selectedSubject, batchId: selectedBatch });
+                  const subjectName = subjects.find((s) => s.id === selectedSubject)?.name || "Subject";
+                  const batchName = batchesList.find((b) => b.id === selectedBatch)?.name || "Batch";
+                  setTeachers((prev) => prev.map((teacher) => teacher.id === selectedTeacher
+                    ? {
+                        ...teacher,
+                        batchSubjects: [
+                          ...(teacher.batchSubjects || []),
+                          { subject: { name: subjectName }, batch: { name: batchName } },
+                        ],
+                      }
+                    : teacher));
+                  await swalSuccess({ title: "Assigned", text: "Subject assigned to teacher successfully." });
+                  showToast("Assignment saved");
+                  setSelectedSubject("");
+                  setSelectedBatch("");
+                  setSelectedTeacher("");
+                  await loadTeachers();
+                } catch (err: unknown) {
+                  const anyErr: any = err;
+                  const message = anyErr?.response?.data?.message || (err instanceof Error ? err.message : "Failed to assign subject.");
+                  await swalError({ title: "Assignment failed", text: message });
+                  showToast(message, "error");
+                } finally {
+                  setSubmitting(false);
+                }
+              }} className="w-full bg-primary text-primary-foreground py-2 rounded-lg text-sm font-bold hover:bg-primary/90 transition">{submitting ? "Saving..." : "Save Assignment"}</button>
             </div>
             <div>
               <h3 className="font-semibold text-foreground mb-4">Current Assignments</h3>
@@ -271,6 +403,116 @@ export default function TeachersPage() {
         </div>
       )}
 
+      {profileModalOpen && selectedTeacherProfile && (
+        <Modal title="Teacher Details" onClose={() => setProfileModalOpen(false)}>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">{getName(selectedTeacherProfile)}</h3>
+              <p className="text-sm text-muted-foreground">{selectedTeacherProfile.user?.email || selectedTeacherProfile.phone || "—"}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">Phone</p>
+                <p className="text-foreground font-medium mt-0.5">{selectedTeacherProfile.phone || "—"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">Assignments</p>
+                <p className="text-foreground font-medium mt-0.5">{getSubjects(selectedTeacherProfile).length}</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-semibold mb-2">Qualifications</p>
+              <p className="text-foreground font-medium">{selectedTeacherProfile.qualification || "—"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-semibold mb-2">Experience</p>
+              <p className="text-foreground font-medium">{selectedTeacherProfile.experience ? `${selectedTeacherProfile.experience} years` : "—"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-semibold mb-2">Specialization</p>
+              <p className="text-foreground font-medium">{selectedTeacherProfile.specialization || "—"}</p>
+            </div>
+            {selectedTeacherProfile.bio && (
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-semibold mb-2">Bio</p>
+                <p className="text-foreground text-sm">{selectedTeacherProfile.bio}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-semibold mb-2">Subjects</p>
+              <div className="flex flex-wrap gap-2">
+                {getSubjects(selectedTeacherProfile).length > 0 ? getSubjects(selectedTeacherProfile).map((subject) => (
+                  <span key={subject} className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">{subject}</span>
+                )) : <span className="text-sm text-muted-foreground">No subjects assigned</span>}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-semibold mb-2">Batches</p>
+              <div className="flex flex-wrap gap-2">
+                {getBatches(selectedTeacherProfile).length > 0 ? getBatches(selectedTeacherProfile).map((batch) => (
+                  <span key={batch} className="bg-secondary text-foreground text-xs px-2 py-0.5 rounded-full">{batch}</span>
+                )) : <span className="text-sm text-muted-foreground">No batches assigned</span>}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button onClick={() => openTeacherEdit(selectedTeacherProfile)} className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition">
+                Edit Profile
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {editModalOpen && selectedTeacherProfile && (
+        <Modal title="Edit Teacher Profile" onClose={() => setEditModalOpen(false)}>
+          <form className="space-y-4" onSubmit={handleUpdateTeacher}>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Qualification</label>
+              <input
+                type="text"
+                value={editForm.qualification}
+                onChange={(e) => setEditForm({ ...editForm, qualification: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Experience (Years)</label>
+              <input
+                type="number"
+                value={editForm.experience}
+                onChange={(e) => setEditForm({ ...editForm, experience: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Specialization</label>
+              <input
+                type="text"
+                value={editForm.specialization}
+                onChange={(e) => setEditForm({ ...editForm, specialization: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Bio</label>
+              <textarea
+                value={editForm.bio}
+                onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                rows={4}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button type="button" onClick={() => setEditModalOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">Cancel</button>
+              <button type="submit" disabled={submitting} className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50">
+                {submitting ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
       {/* Add Teacher Modal */}
       {addModalOpen && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -319,6 +561,20 @@ export default function TeachersPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
+          <h2 className="text-lg font-bold text-foreground">{title}</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">✕</button>
+        </div>
+        <div className="p-6">{children}</div>
+      </div>
     </div>
   );
 }
