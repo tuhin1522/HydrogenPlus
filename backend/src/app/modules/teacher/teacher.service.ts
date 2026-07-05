@@ -50,7 +50,13 @@ const getAllTeachers = async (query: IQueryParams) => {
                 }
             },
             branch: true,
-        }, ['user', 'branch']);
+            batchSubjects: {
+                include: {
+                    subject: true,
+                    batch: true,
+                }
+            },
+        }, ['user', 'branch', 'batchSubjects']);
 
     const result = await teacherQuery.execute();
     return result;
@@ -76,8 +82,14 @@ const getMyProfile = async (userId: string) => {
                     isActive: true,
                 }
             },
-            branch: true
-        }, ['user', 'branch']);
+            branch: true,
+            batchSubjects: {
+                include: {
+                    subject: true,
+                    batch: true,
+                }
+            },
+        }, ['user', 'branch', 'batchSubjects']);
 
     const result = await teacherQuery.execute();
     return result.data[0] || null;
@@ -106,8 +118,14 @@ const getTeacherById = async (id: string) => {
                     isActive: true,
                 }
             },
-            branch: true
-        }, ['user', 'branch']);
+            branch: true,
+            batchSubjects: {
+                include: {
+                    subject: true,
+                    batch: true,
+                }
+            },
+        }, ['user', 'branch', 'batchSubjects']);
 
     const result = await teacherQuery.execute();
     return result.data[0] || null;

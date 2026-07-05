@@ -14,6 +14,9 @@ type Student = {
   classLevel?: { name?: string };
   batch?: { name?: string };
   guardianName?: string;
+  guardianPhone?: string;
+  schoolName?: string;
+  address?: string;
   phone?: string;
   status?: string;
 };
@@ -39,6 +42,14 @@ export default function StudentsPage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    id: "",
+    guardianName: "",
+    guardianPhone: "",
+    schoolName: "",
+    address: "",
+  });
   const [submitting, setSubmitting] = useState(false);
   const [page, setPage] = useState(1);
   const perPage = 10;
@@ -148,6 +159,61 @@ export default function StudentsPage() {
       const message = e?.response?.data?.message || "Failed to delete.";
       await swalError({ title: "Delete failed", text: message });
       showToast(message, "error");
+    }
+  };
+
+  const openEditModal = (student: Student) => {
+    setSelectedStudent(student);
+    setEditForm({
+      id: student.id,
+      guardianName: student.guardianName || "",
+      guardianPhone: student.guardianPhone || student.phone || "",
+      schoolName: student.schoolName || "",
+      address: student.address || "",
+    });
+    setViewModalOpen(false);
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateStudent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSubmitting(true);
+
+      const payload: Record<string, unknown> = {};
+
+      if (editForm.guardianName.trim()) {
+        payload.guardianName = editForm.guardianName.trim();
+      }
+
+      if (editForm.guardianPhone.trim()) {
+        const phone = editForm.guardianPhone.trim();
+        payload.guardianPhone = phone;
+      }
+
+      if (editForm.schoolName.trim()) {
+        payload.schoolName = editForm.schoolName.trim();
+      } else {
+        payload.schoolName = null;
+      }
+
+      if (editForm.address.trim()) {
+        payload.address = editForm.address.trim();
+      } else {
+        payload.address = null;
+      }
+
+      await branchAdminService.updateStudent(editForm.id, payload);
+      await swalSuccess({ title: "Student updated", text: "The student profile was updated successfully." });
+      showToast("Student profile updated!");
+      setEditModalOpen(false);
+      await loadStudents();
+    } catch (e: any) {
+      const message = e?.response?.data?.message || "Failed to update student.";
+      await swalError({ title: "Update failed", text: message });
+      showToast(message, "error");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -310,11 +376,11 @@ export default function StudentsPage() {
                           >
                             View
                           </button>
-                          <button className="px-2 py-1 text-xs rounded border border-border text-muted-foreground hover:text-primary hover:border-primary transition">
+                          <button
+                            onClick={() => openEditModal(student)}
+                            className="px-2 py-1 text-xs rounded border border-border text-muted-foreground hover:text-primary hover:border-primary transition"
+                          >
                             Edit
-                          </button>
-                          <button className="px-2 py-1 text-xs rounded border border-border text-muted-foreground hover:text-yellow-500 hover:border-yellow-500 transition">
-                            Promote
                           </button>
                           <button
                             onClick={() => handleDelete(student.id)}
@@ -394,6 +460,56 @@ export default function StudentsPage() {
         </Modal>
       )}
 
+      {/* Edit Student Modal */}
+      {editModalOpen && selectedStudent && (
+        <Modal title="Edit Student Profile" onClose={() => setEditModalOpen(false)}>
+          <form className="space-y-4" onSubmit={handleUpdateStudent}>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Guardian Name</label>
+              <input
+                type="text"
+                value={editForm.guardianName}
+                onChange={(e) => setEditForm({ ...editForm, guardianName: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Guardian Phone</label>
+              <input
+                type="text"
+                value={editForm.guardianPhone}
+                onChange={(e) => setEditForm({ ...editForm, guardianPhone: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">School / College</label>
+              <input
+                type="text"
+                value={editForm.schoolName}
+                onChange={(e) => setEditForm({ ...editForm, schoolName: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Address</label>
+              <textarea
+                value={editForm.address}
+                onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                rows={4}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button type="button" onClick={() => setEditModalOpen(false)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">Cancel</button>
+              <button type="submit" disabled={submitting} className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50">
+                {submitting ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
       {/* View Student Modal */}
       {viewModalOpen && selectedStudent && (
         <Modal title="Student Details" onClose={() => setViewModalOpen(false)}>
@@ -430,7 +546,10 @@ export default function StudentsPage() {
               >
                 Delete
               </button>
-              <button className="px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition">
+              <button
+                onClick={() => selectedStudent && openEditModal(selectedStudent)}
+                className="px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition"
+              >
                 Edit Profile
               </button>
             </div>

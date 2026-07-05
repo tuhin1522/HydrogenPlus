@@ -3,7 +3,25 @@ import { ICreateBatchSubject, IUpdateBatchSubject } from "./batchSubject.interfa
 import { IQueryParams } from "@/app/interface/query.interface";
 import { QueryBuilder } from "@/app/utils/queryBuilder";
 
+import AppError from "@/app/errorHelpers/appError";
+import httpStatus from "http-status";
+
 const createBatchSubject = async (payload: ICreateBatchSubject) => {
+    // validate referenced records
+    const [batch, subject, teacher] = await Promise.all([
+        prisma.batch.findUnique({ where: { id: payload.batchId } }),
+        prisma.subject.findUnique({ where: { id: payload.subjectId } }),
+        prisma.teacherProfile.findUnique({ where: { id: payload.teacherId } }),
+    ]);
+
+    if (!batch) throw new AppError(httpStatus.BAD_REQUEST, "Batch not found");
+    if (!subject) throw new AppError(httpStatus.BAD_REQUEST, "Subject not found");
+    if (!teacher) throw new AppError(httpStatus.BAD_REQUEST, "Teacher not found");
+
+    // prevent duplicate assignment for same batch+subject
+    const existing = await prisma.batchSubject.findFirst({ where: { batchId: payload.batchId, subjectId: payload.subjectId } });
+    if (existing) throw new AppError(httpStatus.CONFLICT, "This subject is already assigned to the selected batch.");
+
     const batchSubject = await prisma.batchSubject.create({
         data: payload,
     });

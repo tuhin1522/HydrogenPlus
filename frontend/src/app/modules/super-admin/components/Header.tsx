@@ -6,6 +6,7 @@ interface HeaderProps {
   setSearchQuery: (query: string) => void;
   showNotifications: boolean;
   setShowNotifications: (show: boolean) => void;
+  user?: { name?: string; email?: string; role?: string };
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -14,6 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
   setSearchQuery,
   showNotifications,
   setShowNotifications,
+  user,
 }) => {
   return (
     <header className="h-16 border-b border-[#27272A] bg-[#0D0B0A]/85 backdrop-blur px-8 flex items-center justify-between sticky top-0 z-10">
@@ -76,9 +78,9 @@ export const Header: React.FC<HeaderProps> = ({
         {/* User Badge */}
         <div className="flex items-center gap-2 border border-[#27272A] px-3 py-1 rounded-full bg-[#1C1917]">
           <div className="h-5 w-5 rounded-full bg-[#22C55E] flex items-center justify-center font-bold text-[#052E16] text-[10px]">
-            SA
+            {user?.name ? user.name.split(" ").map(n=>n[0]).slice(0,2).join("") : "SA"}
           </div>
-          <span className="text-xs font-semibold text-[#F2F2F2]">Super Admin</span>
+          <span className="text-xs font-semibold text-[#F2F2F2]">{(user?.role === "BRANCH_ADMIN" && "Branch Admin") || (user?.role === "TEACHER" && "Teacher") || (user?.role === "STUDENT" && "Student") || (user?.role === "SUPER_ADMIN" && "Super Admin") || "Super Admin"}</span>
         </div>
       </div>
     </header>
