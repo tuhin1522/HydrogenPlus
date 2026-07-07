@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { authController } from './auth.controller';
 import { authValidation } from './auth.validation';
+import { checkAuth } from '../../middleware/checkAuth';
+
 
 const router = Router();
 
@@ -23,5 +25,13 @@ router.post('/resend-verification', authController.resendVerificationHandler);
 router.post('/forgot-password', authValidation.validateForgotPassword, authValidation.handleValidationErrors, authController.forgotPasswordHandler);
 
 router.post('/reset-password', authValidation.validateResetPassword, authValidation.handleValidationErrors, authController.resetPasswordHandler);
+
+router.post(
+  '/change-password',
+  checkAuth(),
+  authValidation.validateChangePassword,
+  authValidation.handleValidationErrors,
+  authController.changePasswordHandler
+);
 
 export const authRoutes = router;

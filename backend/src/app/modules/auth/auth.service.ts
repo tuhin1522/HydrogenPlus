@@ -423,6 +423,41 @@ const resetPassword = async (
   }
 };
 
+/**
+ * Handle change password for authenticated user
+ */
+const changePassword = async (
+  userId: string,
+  oldPassword: string,
+  newPassword: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const isPasswordValid = await bcryptjs.compare(oldPassword, user.password);
+    if (!isPasswordValid) {
+      throw new Error('Invalid old password');
+    }
+
+    const hashedPassword = await bcryptjs.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    return { success: true, message: 'Password changed successfully' };
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to change password');
+  }
+};
+
+
 export const authService = {
   signupUser,
   verifyEmail,
@@ -431,4 +466,5 @@ export const authService = {
   sendPasswordResetEmail,
   forgotPassword,
   resetPassword,
+  changePassword,
 };

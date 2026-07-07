@@ -86,7 +86,23 @@ const getMyProfile = async (userId: string) => {
             batchSubjects: {
                 include: {
                     subject: true,
-                    batch: true,
+                    batch: {
+                        include: {
+                            classLevel: true,
+                            students: {
+                                include: {
+                                    user: {
+                                        select: {
+                                            name: true,
+                                            email: true,
+                                            phone: true,
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    routines: true
                 }
             },
         }, ['user', 'branch', 'batchSubjects']);

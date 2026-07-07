@@ -34,39 +34,75 @@ export interface TeacherDashboardOverview {
 export const teacherService = {
   async getDashboardOverview(): Promise<TeacherDashboardOverview> {
     try {
-      const { data } = await axiosInstance.get<TeacherDashboardOverview>("/teacher/dashboard");
-      return data;
+      // Fetch real data from my-profile to derive stats
+      const { data } = await axiosInstance.get("/teachers/my-profile");
+      const profile = data.data;
+
+      const batchSubjects = profile?.batchSubjects || [];
+      const subjects = new Set(batchSubjects.map((bs: any) => bs.subjectId));
+
+      return {
+        stats: {
+          assignedBatches: batchSubjects.length,
+          totalSubjects: subjects.size,
+          totalStudents: 0, // Placeholder, would need a different API for this
+          todaysClasses: 0,
+          upcomingExams: 0,
+          publishedCourses: 0,
+        },
+        charts: {
+          performance: [72, 78, 81, 76, 86, 90], // Placeholder chart
+        },
+        upcomingClasses: batchSubjects.slice(0, 3).map((bs: any) => ({
+          title: `${bs.subject?.name} Session`,
+          time: "TBD",
+          batch: bs.batch?.name || "Unknown Batch",
+          subject: bs.subject?.name || "Unknown Subject",
+        })),
+        activity: [
+          { title: "Teacher profile synced", description: "Successfully connected to dashboard", time: "Just now" },
+        ],
+        schedule: batchSubjects.slice(0, 3).map((bs: any) => ({
+          day: "TBD",
+          session: "TBD",
+          batch: bs.batch?.name || "Unknown Batch",
+        })),
+      };
     } catch (error) {
       console.error("Failed to load teacher dashboard overview", error);
       toast.error("Unable to load teacher overview right now.");
       return {
         stats: {
-          assignedBatches: 6,
-          totalSubjects: 8,
-          totalStudents: 142,
-          todaysClasses: 4,
-          upcomingExams: 3,
-          publishedCourses: 5,
+          assignedBatches: 0,
+          totalSubjects: 0,
+          totalStudents: 0,
+          todaysClasses: 0,
+          upcomingExams: 0,
+          publishedCourses: 0,
         },
         charts: {
-          performance: [72, 78, 81, 76, 86, 90],
+          performance: [0, 0, 0, 0, 0, 0],
         },
-        upcomingClasses: [
-          { title: "Physics Lab", time: "09:00", batch: "Batch A", subject: "Physics" },
-          { title: "Mathematics Revision", time: "11:30", batch: "Batch B", subject: "Math" },
-          { title: "Chemistry Practice", time: "14:00", batch: "Batch C", subject: "Chemistry" },
-        ],
-        activity: [
-          { title: "New course content uploaded", description: "Chapter 7 notes and slides shared", time: "12m ago" },
-          { title: "Student question resolved", description: "A learner asked for clarification on integration", time: "38m ago" },
-          { title: "Assignment reminder sent", description: "Deadline reminder published for Batch A", time: "1h ago" },
-        ],
-        schedule: [
-          { day: "Monday", session: "09:00 - 10:30", batch: "Batch A" },
-          { day: "Tuesday", session: "11:00 - 12:30", batch: "Batch C" },
-          { day: "Thursday", session: "14:00 - 15:30", batch: "Batch B" },
-        ],
+        upcomingClasses: [],
+        activity: [],
+        schedule: [],
       };
     }
   },
+
+  async getMyProfile() {
+    const { data } = await axiosInstance.get("/teachers/my-profile");
+    return data;
+  },
+
+  async updateMyProfile(data: Record<string, unknown>) {
+    const response = await axiosInstance.patch("/teachers/update-my-profile", data);
+    return response.data;
+  },
+
+  async changePassword(data: Record<string, unknown>) {
+    const response = await axiosInstance.post("/auth/change-password", data);
+    return response.data;
+  }
 };
+

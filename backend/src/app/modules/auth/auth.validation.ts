@@ -116,11 +116,29 @@ const validateResetPassword = [
     .withMessage(AUTH_ERRORS.PASSWORD_NO_SPECIAL_CHAR),
 ];
 
+// Validation for change password
+const validateChangePassword = [
+  body('oldPassword')
+    .notEmpty()
+    .withMessage('Old password is required'),
 
-export const authValidation = { 
-  validateSignup, 
-  handleValidationErrors, 
+  body('newPassword')
+    .isLength({ min: PASSWORD_REQUIREMENTS.MIN_LENGTH })
+    .withMessage(AUTH_ERRORS.PASSWORD_TOO_SHORT)
+    .matches(PASSWORD_REGEX.UPPERCASE)
+    .withMessage(AUTH_ERRORS.PASSWORD_NO_UPPERCASE)
+    .matches(PASSWORD_REGEX.NUMBER)
+    .withMessage(AUTH_ERRORS.PASSWORD_NO_NUMBER)
+    .matches(PASSWORD_REGEX.SPECIAL_CHAR)
+    .withMessage(AUTH_ERRORS.PASSWORD_NO_SPECIAL_CHAR),
+];
+
+
+export const authValidation = {
+  validateSignup,
+  handleValidationErrors,
   validateLogin,
   validateForgotPassword,
-  validateResetPassword 
+  validateResetPassword,
+  validateChangePassword
 };
