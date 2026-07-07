@@ -109,6 +109,21 @@ export const branchAdminService = {
     return data;
   },
 
+  async createSubject(data: Record<string, unknown>) {
+    const response = await axiosInstance.post("/subjects/create-subject", data);
+    return response.data;
+  },
+
+  async updateSubject(id: string, data: Record<string, unknown>) {
+    const response = await axiosInstance.patch(`/subjects/update/${id}`, data);
+    return response.data;
+  },
+
+  async deleteSubject(id: string) {
+    const response = await axiosInstance.delete(`/subjects/delete/${id}`);
+    return response.data;
+  },
+
   async createBatchSubject(data: Record<string, unknown>) {
     const response = await axiosInstance.post("/batch-subjects/create-batch-subject", data);
     return response.data;

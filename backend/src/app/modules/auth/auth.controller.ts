@@ -112,6 +112,28 @@ const resetPasswordHandler = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const changePasswordHandler = catchAsync(async (req: Request, res: Response) => {
+  const { oldPassword, newPassword } = req.body;
+  const userId = req.user?.userId as string;
+
+  if (!userId) {
+    return sendResponse(res, {
+      httpStatusCode: 401,
+      success: false,
+      message: 'Unauthorized',
+    });
+  }
+
+  const result = await authService.changePassword(userId, oldPassword, newPassword);
+
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: result.message,
+  });
+});
+
+
 export const authController = {
   signupHandler,
   loginHandler,
@@ -119,4 +141,5 @@ export const authController = {
   resendVerificationHandler,
   forgotPasswordHandler,
   resetPasswordHandler,
+  changePasswordHandler,
 };

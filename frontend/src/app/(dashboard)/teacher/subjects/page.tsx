@@ -1,12 +1,44 @@
-import { PageShell } from "../../../modules/teacher/components/PageShell";
+"use client";
 
-const subjects = [
-  { name: "Physics", classLevel: "Class 10", batch: "Batch A", students: 34 },
-  { name: "Chemistry", classLevel: "Class 10", batch: "Batch B", students: 28 },
-  { name: "Mathematics", classLevel: "Class 9", batch: "Batch C", students: 31 },
-];
+import { useEffect, useState } from "react";
+import { PageShell } from "../../../modules/teacher/components/PageShell";
+import { teacherService } from "../../../modules/teacher/services/teacher-service";
+import { toast } from "sonner";
+import { ContentSkeleton } from "../../../modules/teacher/components/ContentSkeleton";
 
 export default function TeacherSubjectsPage() {
+  const [batchSubjects, setBatchSubjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchSubjects = async () => {
+      try {
+        const data = await teacherService.getMyProfile();
+        if (mounted) {
+          setBatchSubjects(data?.data?.batchSubjects || []);
+          setLoading(false);
+        }
+      } catch (error) {
+        if (mounted) {
+          toast.error("Failed to load assigned subjects");
+          setLoading(false);
+        }
+      }
+    };
+    fetchSubjects();
+    return () => { mounted = false; };
+  }, []);
+
+  const filteredSubjects = batchSubjects.filter((bs: any) => {
+    const subjectName = bs.subject?.name || "";
+    const batchName = bs.batch?.name || "";
+    const lowerSearch = search.toLowerCase();
+    return subjectName.toLowerCase().includes(lowerSearch) || 
+           batchName.toLowerCase().includes(lowerSearch);
+  });
+
   return (
     <PageShell
       title="My Subjects"
@@ -20,30 +52,52 @@ export default function TeacherSubjectsPage() {
             <h2 className="text-lg font-semibold text-foreground">Assigned subjects</h2>
             <p className="text-sm text-muted-foreground">Search, filter, and keep track of your teaching load.</p>
           </div>
-          <input className="w-full rounded-xl border border-border/70 bg-background px-3 py-2 text-sm sm:w-64" placeholder="Search subjects" />
+          <input
+            className="w-full rounded-xl border border-border/70 bg-background px-3 py-2 text-sm sm:w-64 outline-none focus:border-primary transition"
+            placeholder="Search subjects or batches"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-        <div className="overflow-hidden rounded-2xl border border-border/70">
-          <table className="min-w-full divide-y divide-border text-sm">
-            <thead className="bg-muted/60 text-left text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-medium">Subject</th>
-                <th className="px-4 py-3 font-medium">Class</th>
-                <th className="px-4 py-3 font-medium">Batch</th>
-                <th className="px-4 py-3 font-medium">Students</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border bg-card">
-              {subjects.map((subject) => (
-                <tr key={subject.name} className="hover:bg-muted/30">
-                  <td className="px-4 py-3 font-medium text-foreground">{subject.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{subject.classLevel}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{subject.batch}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{subject.students}</td>
+
+        {loading ? (
+          <ContentSkeleton />
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-border/70">
+            <table className="min-w-full divide-y divide-border text-sm">
+              <thead className="bg-muted/60 text-left text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Subject</th>
+                  <th className="px-4 py-3 font-medium">Code</th>
+                  <th className="px-4 py-3 font-medium">Batch</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-border bg-card">
+                {filteredSubjects.length > 0 ? (
+                  filteredSubjects.map((bs, index) => (
+                    <tr key={`${bs.batchId}-${bs.subjectId}-${index}`} className="hover:bg-muted/30">
+                      <td className="px-4 py-3 font-medium text-foreground">{bs.subject?.name || "Unknown"}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{bs.subject?.code || "N/A"}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{bs.batch?.name || "Unknown Batch"}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                          Active
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                      No subjects found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </PageShell>
   );
