@@ -38,7 +38,39 @@ const getMyProfile = async (userId: string) => {
           isActive: true,
         }
       },
-      batch: true,
+      batch: {
+        include: {
+          classLevel: true,
+          routines: {
+            include: {
+              batchSubject: {
+                include: {
+                  subject: true,
+                  teacher: {
+                    include: {
+                      user: {
+                        select: { name: true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          subjects: {
+            include: {
+              subject: true,
+              teacher: {
+                include: {
+                  user: {
+                    select: { name: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
     }, ['user', 'batch']);
   const result = await queryBuilder.execute();
   return result.data[0] || null;  

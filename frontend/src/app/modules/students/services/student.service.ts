@@ -38,17 +38,66 @@ function buildFallbackOverview(): StudentDashboardOverview {
 }
 
 export const studentService = {
+  async getMyProfile() {
+    const { data } = await axiosInstance.get("/students/my-profile");
+    return data;
+  },
+
   async getDashboardOverview(): Promise<StudentDashboardOverview> {
     try {
-      const { data } = await axiosInstance.get<unknown>("/students/my-profile");
-      const normalized = normalizeStudentDashboardOverview(data);
-      if (normalized) {
-        return normalized;
-      }
+      const { data } = await axiosInstance.get("/students/my-profile");
+      const profile = data?.data;
+      
+      const batch = profile?.batch;
+      const routines = batch?.routines || [];
+      const subjects = batch?.subjects || [];
+      
+      // Calculate today's classes
+      const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
+      const todaysClasses = routines
+        .filter((r: any) => r.dayOfWeek === today)
+        .map((r: any) => ({
+          title: `${r.batchSubject?.subject?.name || "Unknown"} Class`,
+          time: new Date(r.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+          batch: batch.name,
+          subject: r.batchSubject?.subject?.name || "Unknown",
+        }));
+        
+      return {
+        stats: {
+          currentClass: batch?.classLevel?.name || "Unknown",
+          currentBatch: batch?.name || "Unknown",
+          enrolledCourses: subjects.length,
+          upcomingExams: 0,
+          completedExams: 0,
+          attendancePercentage: 100, // Placeholder
+        },
+        performance: [
+          { label: "Mathematics", value: 88 },
+          { label: "Science", value: 84 },
+          { label: "English", value: 91 },
+        ],
+        upcomingClasses: todaysClasses.slice(0, 3),
+        quickActions: [
+          { title: "View routine", href: "/student/routine", icon: "🗓️" },
+          { title: "Open course", href: "/student/courses", icon: "📚" },
+        ],
+        recentActivity: [
+          { title: "Profile Synced", description: "Successfully connected to dashboard", time: "Just now" },
+        ],
+      };
     } catch {
-      // Fall back to the local dashboard overview when the backend route is unavailable.
+      return buildFallbackOverview();
     }
-
-    return buildFallbackOverview();
   },
+
+  async updateMyProfile(data: Record<string, unknown>) {
+    const response = await axiosInstance.patch("/students/update-my-profile", data);
+    return response.data;
+  },
+
+  async changePassword(data: Record<string, unknown>) {
+    const response = await axiosInstance.post("/auth/change-password", data);
+    return response.data;
+  }
 };
